@@ -3,6 +3,7 @@ package com.eleks.userservice.controller;
 import com.eleks.userservice.dto.UserDto;
 import com.eleks.userservice.service.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -25,7 +26,13 @@ public class UserController {
     }
 
     @PostMapping("/users")
+    @ResponseStatus(HttpStatus.CREATED)
     public UserDto saveUser(@Valid @RequestBody UserDto user) {
         return service.saveUser(user);
+    }
+
+    @PutMapping("/users/{id}")
+    public UserDto editUser(@PathVariable Long id, @Valid @RequestBody UserDto user) {
+        return service.editUser(id, user);
     }
 }

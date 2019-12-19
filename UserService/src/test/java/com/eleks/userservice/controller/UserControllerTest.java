@@ -24,9 +24,9 @@ import static com.eleks.userservice.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
@@ -129,7 +129,7 @@ public class UserControllerTest {
         mockMvc.perform(post("/users/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(userData)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(asJsonString(result)));
     }
@@ -258,6 +258,48 @@ public class UserControllerTest {
         ErrorDto error = jsonAsObject(responseBody, ErrorDto.class);
 
         assertEquals(error.getStatusCode(), HttpStatus.BAD_REQUEST.value());
+        assertNotNull(error.getMessages());
+        assertEquals(1, error.getMessages().size());
+        assertNotNull(error.getTimestamp());
+    }
+
+    @Test
+    public void editUser_UserExists_ReturnOkAndUpdatedData() throws Exception {
+        UserDto result = UserDto.builder()
+                .id(1L)
+                .username(userData.getUsername())
+                .firstName(userData.getFirstName())
+                .lastName(userData.getLastName())
+                .dateOfBirth(userData.getDateOfBirth())
+                .email(userData.getEmail())
+                .receiveNotifications(userData.getReceiveNotifications())
+                .build();
+
+        when(service.editUser(anyLong(), any(UserDto.class))).thenReturn(result);
+
+        mockMvc.perform(put("/users/" + result.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(userData)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(result)));
+    }
+
+    @Test
+    public void editUser_UserDoesntExist_ReturnNotFoundAndError() throws Exception {
+
+        when(service.editUser(anyLong(), any(UserDto.class))).thenThrow(ResourceNotFoundException.class);
+
+        String responseBody = mockMvc.perform(put("/users/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(userData)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorDto error = jsonAsObject(responseBody, ErrorDto.class);
+
+        assertEquals(error.getStatusCode(), HttpStatus.NOT_FOUND.value());
         assertNotNull(error.getMessages());
         assertEquals(1, error.getMessages().size());
         assertNotNull(error.getTimestamp());
