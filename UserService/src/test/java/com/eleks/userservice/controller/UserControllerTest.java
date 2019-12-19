@@ -15,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 import static com.eleks.userservice.TestUtils.asJsonString;
 import static com.eleks.userservice.TestUtils.jsonAsObject;
@@ -80,6 +82,20 @@ public class UserControllerTest {
         assertEquals(error.getStatus(), HttpStatus.NOT_FOUND.value());
         assertNotNull(error.getMessage());
         assertNotNull(error.getTimestamp());
+    }
+
+    @Test
+    public void getUsers_UsersExists_ReturnListOfUsers() throws Exception {
+        List<UserDto> list = Arrays.asList(UserDto.builder().id(1L).build(),
+                UserDto.builder().id(2L).build(),
+                UserDto.builder().id(3L).build());
+
+        when(service.getUsers()).thenReturn(list);
+
+        mockMvc.perform(get("/users/"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(list)));
     }
 
 }
