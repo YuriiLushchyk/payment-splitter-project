@@ -3,6 +3,8 @@ package com.eleks.userservice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import java.util.Random;
+
 public class TestUtils {
 
     public static String asJsonString(final Object obj) {
@@ -23,5 +25,15 @@ public class TestUtils {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static String getRandomString(int length) {
+        String source = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+        Random random = new Random();
+        char[] text = new char[length];
+        for (int i = 0; i < length; i++) {
+            text[i] = source.charAt(random.nextInt(source.length()));
+        }
+        return new String(text);
     }
 }
