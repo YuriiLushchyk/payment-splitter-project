@@ -23,9 +23,8 @@ import java.util.List;
 import static com.eleks.userservice.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -296,6 +295,34 @@ public class UserControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
+
+        ErrorDto error = jsonAsObject(responseBody, ErrorDto.class);
+
+        assertEquals(error.getStatusCode(), HttpStatus.NOT_FOUND.value());
+        assertNotNull(error.getMessages());
+        assertEquals(1, error.getMessages().size());
+        assertNotNull(error.getTimestamp());
+    }
+
+    @Test
+    public void deleteUser_UserExists_ReturnOk() throws Exception {
+        Long id = 1L;
+        mockMvc.perform(delete("/users/" + id))
+                .andExpect(status().isOk());
+
+        verify(service).deleteUserById(eq(id));
+    }
+
+    @Test
+    public void deleteUser_UserDoesntExist_ReturnNotFoundAndError() throws Exception {
+        Long id = 1L;
+        doThrow(ResourceNotFoundException.class).when(service).deleteUserById(id);
+
+        String responseBody = mockMvc.perform(delete("/users/" + id))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
 
         ErrorDto error = jsonAsObject(responseBody, ErrorDto.class);
 
