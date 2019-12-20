@@ -1,6 +1,7 @@
 package com.eleks.userservice.controller;
 
-import com.eleks.userservice.dto.UserDto;
+import com.eleks.userservice.dto.user.UserRequestDto;
+import com.eleks.userservice.dto.user.UserResponseDto;
 import com.eleks.userservice.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,23 +17,24 @@ public class UserController {
     private final UserService service;
 
     @GetMapping("/users/{id}")
-    public UserDto getUser(@PathVariable Long id) {
+    public UserResponseDto getUser(@PathVariable Long id) {
         return service.getUser(id);
     }
 
     @GetMapping("/users")
-    public List<UserDto> getUsers() {
+    public List<UserResponseDto> getUsers() {
         return service.getUsers();
     }
 
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto saveUser(@Valid @RequestBody UserDto user) {
+    public UserResponseDto saveUser(@Valid @RequestBody UserRequestDto user) {
         return service.saveUser(user);
     }
 
     @PutMapping("/users/{id}")
-    public UserDto editUser(@PathVariable Long id, @Valid @RequestBody UserDto user) {
+    public UserResponseDto editUser(@PathVariable Long id, @Valid @RequestBody UserRequestDto user) {
+
         return service.editUser(id, user);
     }
 

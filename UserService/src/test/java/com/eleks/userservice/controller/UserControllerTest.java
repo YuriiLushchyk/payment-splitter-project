@@ -2,9 +2,10 @@ package com.eleks.userservice.controller;
 
 import com.eleks.userservice.advisor.ResponseExceptionHandler;
 import com.eleks.userservice.dto.ErrorDto;
-import com.eleks.userservice.dto.UserDto;
+import com.eleks.userservice.dto.user.UserRequestDto;
+import com.eleks.userservice.dto.user.UserResponseDto;
 import com.eleks.userservice.exception.ResourceNotFoundException;
-import com.eleks.userservice.exception.UserDataException;
+import com.eleks.userservice.exception.UniqueUserPropertiesViolationException;
 import com.eleks.userservice.service.UserService;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static com.eleks.userservice.TestUtils.*;
@@ -41,7 +43,9 @@ public class UserControllerTest {
     @Autowired
     private UserController controller;
 
-    private UserDto userData;
+    private UserRequestDto userRequestDto;
+
+    private UserResponseDto userResponseDto;
 
     @BeforeEach
     public void setUp() {
@@ -49,41 +53,42 @@ public class UserControllerTest {
                 .setControllerAdvice(new ResponseExceptionHandler())
                 .build();
 
-        userData = UserDto.builder()
+        userRequestDto = UserRequestDto.builder()
                 .username("username")
                 .firstName("firstName")
                 .lastName("lastName")
                 .dateOfBirth(LocalDate.now())
                 .email("username@eleks.com")
                 .receiveNotifications(true)
+                .build();
+
+        userResponseDto = UserResponseDto.builder()
+                .id(1L)
+                .username(userRequestDto.getUsername())
+                .firstName(userRequestDto.getFirstName())
+                .lastName(userRequestDto.getLastName())
+                .dateOfBirth(userRequestDto.getDateOfBirth())
+                .email(userRequestDto.getEmail())
+                .receiveNotifications(userRequestDto.getReceiveNotifications())
                 .build();
     }
 
     @Test
     public void getUser_userExits_ReturnOK() throws Exception {
-        UserDto result = UserDto.builder()
-                .id(1L)
-                .username("username")
-                .firstName("firstName")
-                .lastName("lastName")
-                .dateOfBirth(LocalDate.now())
-                .email("username@eleks.com")
-                .receiveNotifications(true)
-                .build();
+        when(service.getUser(userResponseDto.getId())).thenReturn(userResponseDto);
 
-        when(service.getUser(result.getId())).thenReturn(result);
-
-        mockMvc.perform(get("/users/" + result.getId()))
+        mockMvc.perform(get("/users/" + userResponseDto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(asJsonString(result)));
+                .andExpect(content().json(asJsonString(userResponseDto)));
     }
 
 
     @Test
     public void getUser_userDoesntExits_ReturnNotFoundAndError() throws Exception {
         Long id = 1L;
-        when(service.getUser(id)).thenThrow(ResourceNotFoundException.class);
+        Throwable exception = new ResourceNotFoundException("msg");
+        when(service.getUser(id)).thenThrow(exception);
 
         String responseBody = mockMvc.perform(get("/users/" + id))
                 .andExpect(status().isNotFound())
@@ -93,15 +98,27 @@ public class UserControllerTest {
 
         ErrorDto error = jsonAsObject(responseBody, ErrorDto.class);
         assertEquals(error.getStatusCode(), HttpStatus.NOT_FOUND.value());
-        assertEquals(1, error.getMessages().size());
+        assertEquals(exception.getMessage(), error.getMessages().get(0));
         assertNotNull(error.getTimestamp());
     }
 
     @Test
     public void getUsers_UsersExists_ReturnListOfUsers() throws Exception {
-        List<UserDto> list = Arrays.asList(UserDto.builder().id(1L).build(),
-                UserDto.builder().id(2L).build(),
-                UserDto.builder().id(3L).build());
+        List<UserResponseDto> list = Arrays.asList(UserResponseDto.builder().id(1L).build(),
+                UserResponseDto.builder().id(2L).build(),
+                UserResponseDto.builder().id(3L).build());
+
+        when(service.getUsers()).thenReturn(list);
+
+        mockMvc.perform(get("/users/"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(list)));
+    }
+
+    @Test
+    public void getUsers_NoUsers_ReturnEmptyList() throws Exception {
+        List<UserResponseDto> list = Collections.emptyList();
 
         when(service.getUsers()).thenReturn(list);
 
@@ -113,34 +130,141 @@ public class UserControllerTest {
 
     @Test
     public void createUser_UserDoesntExist_ReturnOKAndSavedUser() throws Exception {
-        UserDto result = UserDto.builder()
-                .id(1L)
-                .username(userData.getUsername())
-                .firstName(userData.getFirstName())
-                .lastName(userData.getLastName())
-                .dateOfBirth(userData.getDateOfBirth())
-                .email(userData.getEmail())
-                .receiveNotifications(userData.getReceiveNotifications())
-                .build();
-
-        when(service.saveUser(any(UserDto.class))).thenReturn(result);
+        when(service.saveUser(any(UserRequestDto.class))).thenReturn(userResponseDto);
 
         mockMvc.perform(post("/users/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(userData)))
+                .content(asJsonString(userRequestDto)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(asJsonString(result)));
+                .andExpect(content().json(asJsonString(userResponseDto)));
     }
 
     @Test
-    public void createUser_WrongUserData_ReturnBabRequestAndError() throws Exception {
+    public void createUser_DuplicatedEmailOrUsernameData_ReturnBadRequestAndError() throws Exception {
+        Throwable exceptions = new UniqueUserPropertiesViolationException("msg");
 
-        when(service.saveUser(any(UserDto.class))).thenThrow(UserDataException.class);
+        when(service.saveUser(any(UserRequestDto.class))).thenThrow(exceptions);
 
         String responseBody = mockMvc.perform(post("/users/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(userData)))
+                .content(asJsonString(userRequestDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorDto error = jsonAsObject(responseBody, ErrorDto.class);
+
+        assertEquals(error.getStatusCode(), HttpStatus.BAD_REQUEST.value());
+        assertNotNull(error.getMessages());
+        assertEquals(exceptions.getMessage(), error.getMessages().get(0));
+        assertNotNull(error.getTimestamp());
+    }
+
+    @Test
+    public void createUser_WithoutUsername_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setUsername(null);
+        String errorMsg = "username is required";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void createUser_WithBlankUsername_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setUsername("");
+        String errorMsg = "username length should be between 1 and 50";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void createUser_WithTooLongUsername_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setUsername(getRandomString(51));
+        String errorMsg = "username length should be between 1 and 50";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void createUser_WithoutFirstName_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setFirstName(null);
+        String errorMsg = "firstName is required";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void createUser_WithBlankFirstName_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setFirstName("");
+        String errorMsg = "firstName length should be between 1 and 50";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void createUser_WithTooLongFirstName_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setFirstName(getRandomString(51));
+        String errorMsg = "firstName length should be between 1 and 50";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void createUser_WithoutLastName_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setLastName(null);
+        String errorMsg = "lastName is required";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void createUser_WithBlankLastName_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setLastName("");
+        String errorMsg = "lastName length should be between 1 and 50";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void createUser_WithTooLongLastName_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setLastName(getRandomString(51));
+        String errorMsg = "lastName length should be between 1 and 50";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void createUser_WithoutBirthDate_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setDateOfBirth(null);
+        String errorMsg = "dateOfBirth is required";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void createUser_WithWrongDateFormat_ReturnBadRequestAndError() throws Exception {
+        JSONObject json = new JSONObject(asJsonString(userRequestDto));
+        json.put("dateOfBirth", "2019-12-19");
+        String errorMsg = "Incorrect date format of dateOfBirth. Valid pattern is dd-MM-yyyy";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(json.toString(), errorMsg);
+    }
+
+    @Test
+    public void createUser_WithoutEmail_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setEmail(null);
+        String errorMsg = "email is required";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void createUser_WithWrongEmailFormat_ReturnBadRequestAndError() throws Exception {
+        JSONObject json = new JSONObject(asJsonString(userRequestDto));
+        json.put("email", "#fr@gr@.com");
+        String errorMsg = "email string has to be a well-formed email address";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(json.toString(), errorMsg);
+    }
+
+    @Test
+    public void createUser_WithoutNotificationProp_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setReceiveNotifications(null);
+        String errorMsg = "receiveNotifications is required";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+    }
+
+    private void postUserDataAndExpectBadRequestErrorWithSingleMsg(String content, String errorMsg) throws Exception {
+        String responseBody = mockMvc.perform(post("/users/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
@@ -150,106 +274,19 @@ public class UserControllerTest {
         assertEquals(error.getStatusCode(), HttpStatus.BAD_REQUEST.value());
         assertNotNull(error.getMessages());
         assertEquals(1, error.getMessages().size());
+        assertEquals(errorMsg, error.getMessages().get(0));
         assertNotNull(error.getTimestamp());
     }
 
     @Test
-    public void createUser_WithoutUsername_ReturnBabRequestAndError() throws Exception {
-        userData.setUsername(null);
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userData));
-    }
-
-    @Test
-    public void createUser_WithBlankUsername_ReturnBabRequestAndError() throws Exception {
-        userData.setUsername("");
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userData));
-    }
-
-    @Test
-    public void createUser_WithTooLongUsername_ReturnBabRequestAndError() throws Exception {
-        userData.setUsername(getRandomString(51));
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userData));
-    }
-
-    @Test
-    public void createUser_WithoutFirstName_ReturnBabRequestAndError() throws Exception {
-        userData.setFirstName(null);
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userData));
-    }
-
-    @Test
-    public void createUser_WithBlankFirstName_ReturnBabRequestAndError() throws Exception {
-        userData.setFirstName("");
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userData));
-    }
-
-    @Test
-    public void createUser_WithTooLongFirstName_ReturnBabRequestAndError() throws Exception {
-        userData.setFirstName(getRandomString(51));
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userData));
-    }
-
-    @Test
-    public void createUser_WithoutLastName_ReturnBabRequestAndError() throws Exception {
-        userData.setLastName(null);
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userData));
-    }
-
-    @Test
-    public void createUser_WithBlankLastName_ReturnBabRequestAndError() throws Exception {
-        userData.setLastName("");
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userData));
-    }
-
-    @Test
-    public void createUser_WithTooLongLastName_ReturnBabRequestAndError() throws Exception {
-        userData.setLastName(getRandomString(51));
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userData));
-    }
-
-    @Test
-    public void createUser_WithoutBirthDate_ReturnBabRequestAndError() throws Exception {
-        userData.setDateOfBirth(null);
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userData));
-    }
-
-    @Test
-    public void createUser_WithWrongDateFormat_ReturnBabRequestAndError() throws Exception {
-        JSONObject json = new JSONObject(asJsonString(userData));
-        json.put("dateOfBirth", "2019-12-19");
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(json.toString());
-    }
-
-    @Test
-    public void createUser_WithoutEmail_ReturnBabRequestAndError() throws Exception {
-        userData.setEmail(null);
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userData));
-    }
-
-    @Test
-    public void createUser_WithWrongEmailFormat_ReturnBabRequestAndError() throws Exception {
-        JSONObject json = new JSONObject(asJsonString(userData));
-        json.put("email", "#fr@gr@.com");
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(json.toString());
-    }
-
-    @Test
-    public void createUser_WithoutNotificationProp_ReturnBabRequestAndError() throws Exception {
-        userData.setReceiveNotifications(null);
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userData));
-    }
-
-    @Test
-    public void createUser_InvalidNotificationProp_ReturnBabRequestAndError() throws Exception {
-        JSONObject json = new JSONObject(asJsonString(userData));
+    public void createUser_InvalidNotificationProp_ReturnBadRequestAndError() throws Exception {
+        JSONObject json = new JSONObject(asJsonString(userRequestDto));
         json.put("receiveNotifications", "#fr@gr@.com");
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(json.toString());
-    }
+        String errorMsg = "username can't be null";
 
-    private void postUserDataAndExpectBadRequestErrorWithSingleMsg(String content) throws Exception {
         String responseBody = mockMvc.perform(post("/users/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(content))
+                .content(json.toString()))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
@@ -264,34 +301,24 @@ public class UserControllerTest {
 
     @Test
     public void editUser_UserExists_ReturnOkAndUpdatedData() throws Exception {
-        UserDto result = UserDto.builder()
-                .id(1L)
-                .username(userData.getUsername())
-                .firstName(userData.getFirstName())
-                .lastName(userData.getLastName())
-                .dateOfBirth(userData.getDateOfBirth())
-                .email(userData.getEmail())
-                .receiveNotifications(userData.getReceiveNotifications())
-                .build();
+        when(service.editUser(anyLong(), any(UserRequestDto.class))).thenReturn(userResponseDto);
 
-        when(service.editUser(anyLong(), any(UserDto.class))).thenReturn(result);
-
-        mockMvc.perform(put("/users/" + result.getId())
+        mockMvc.perform(put("/users/" + userResponseDto.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(userData)))
+                .content(asJsonString(userRequestDto)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(asJsonString(result)));
+                .andExpect(content().json(asJsonString(userResponseDto)));
     }
 
     @Test
     public void editUser_UserDoesntExist_ReturnNotFoundAndError() throws Exception {
 
-        when(service.editUser(anyLong(), any(UserDto.class))).thenThrow(ResourceNotFoundException.class);
+        when(service.editUser(anyLong(), any(UserRequestDto.class))).thenThrow(ResourceNotFoundException.class);
 
         String responseBody = mockMvc.perform(put("/users/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(userData)))
+                .content(asJsonString(userResponseDto)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
@@ -305,129 +332,120 @@ public class UserControllerTest {
     }
 
     @Test
-    public void editUser_WithoutUsername_ReturnBabRequestAndError() throws Exception {
+    public void editUser_WithoutUsername_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userData.setId(id);
-        userData.setUsername(null);
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+        userRequestDto.setUsername(null);
+        String errorMsg = "username is required";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
     }
 
     @Test
-    public void editUser_WithBlankUsername_ReturnBabRequestAndError() throws Exception {
+    public void editUser_WithBlankUsername_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userData.setId(id);
-        userData.setUsername("");
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+        userRequestDto.setUsername("");
+        String errorMsg = "username length should be between 1 and 50";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
     }
 
     @Test
-    public void editUser_WithTooLongUsername_ReturnBabRequestAndError() throws Exception {
+    public void editUser_WithTooLongUsername_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userData.setId(id);
-        userData.setUsername(getRandomString(51));
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+        userRequestDto.setUsername(getRandomString(51));
+        String errorMsg = "username length should be between 1 and 50";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
     }
 
     @Test
-    public void editUser_WithoutFirstName_ReturnBabRequestAndError() throws Exception {
+    public void editUser_WithoutFirstName_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userData.setId(id);
-        userData.setFirstName(null);
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+        userRequestDto.setFirstName(null);
+        String errorMsg = "firstName is required";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
     }
 
     @Test
-    public void editUser_WithBlankFirstName_ReturnBabRequestAndError() throws Exception {
+    public void editUser_WithBlankFirstName_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userData.setId(id);
-        userData.setFirstName("");
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+        userRequestDto.setFirstName("");
+        String errorMsg = "firstName length should be between 1 and 50";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
     }
 
     @Test
-    public void editUser_WithTooLongFirstName_ReturnBabRequestAndError() throws Exception {
+    public void editUser_WithTooLongFirstName_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userData.setId(id);
-        userData.setFirstName(getRandomString(51));
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+        userRequestDto.setFirstName(getRandomString(51));
+        String errorMsg = "firstName length should be between 1 and 50";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
     }
 
     @Test
-    public void editUser_WithoutLastName_ReturnBabRequestAndError() throws Exception {
+    public void editUser_WithoutLastName_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userData.setId(id);
-        userData.setLastName(null);
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+        userRequestDto.setLastName(null);
+        String errorMsg = "lastName is required";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
     }
 
     @Test
-    public void editUser_WithBlankLastName_ReturnBabRequestAndError() throws Exception {
+    public void editUser_WithBlankLastName_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userData.setId(id);
-        userData.setLastName("");
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+        userRequestDto.setLastName("");
+        String errorMsg = "lastName length should be between 1 and 50";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
     }
 
     @Test
-    public void editUser_WithTooLongLastName_ReturnBabRequestAndError() throws Exception {
+    public void editUser_WithTooLongLastName_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userData.setId(id);
-        userData.setLastName(getRandomString(51));
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+        userRequestDto.setLastName(getRandomString(51));
+        String errorMsg = "lastName length should be between 1 and 50";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
     }
 
     @Test
-    public void editUser_WithoutBirthDate_ReturnBabRequestAndError() throws Exception {
+    public void editUser_WithoutBirthDate_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userData.setId(id);
-        userData.setDateOfBirth(null);
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+        userRequestDto.setDateOfBirth(null);
+        String errorMsg = "dateOfBirth is required";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
     }
 
     @Test
-    public void editUser_WithWrongDateFormat_ReturnBabRequestAndError() throws Exception {
+    public void editUser_WithWrongDateFormat_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userData.setId(id);
-        JSONObject json = new JSONObject(asJsonString(userData));
+        JSONObject json = new JSONObject(asJsonString(userRequestDto));
         json.put("dateOfBirth", "2019-12-19");
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, json.toString());
+        String errorMsg = "Incorrect date format of dateOfBirth. Valid pattern is dd-MM-yyyy";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, json.toString(), errorMsg);
     }
 
     @Test
-    public void editUser_WithoutEmail_ReturnBabRequestAndError() throws Exception {
+    public void editUser_WithoutEmail_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userData.setId(id);
-        userData.setEmail(null);
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+        userRequestDto.setEmail(null);
+        String errorMsg = "email is required";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
     }
 
     @Test
-    public void editUser_WithWrongEmailFormat_ReturnBabRequestAndError() throws Exception {
+    public void editUser_WithWrongEmailFormat_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userData.setId(id);
-        JSONObject json = new JSONObject(asJsonString(userData));
+        JSONObject json = new JSONObject(asJsonString(userRequestDto));
         json.put("email", "#fr@gr@.com");
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, json.toString());
+        String errorMsg = "email string has to be a well-formed email address";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, json.toString(), errorMsg);
     }
 
     @Test
-    public void editUser_WithoutNotificationProp_ReturnBabRequestAndError() throws Exception {
+    public void editUser_WithoutNotificationProp_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userData.setId(id);
-        userData.setReceiveNotifications(null);
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+        userRequestDto.setReceiveNotifications(null);
+        String errorMsg = "receiveNotifications is required";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
     }
 
-    @Test
-    public void editUser_InvalidNotificationProp_ReturnBabRequestAndError() throws Exception {
-        Long id = 1L;
-        userData.setId(id);
-        JSONObject json = new JSONObject(asJsonString(userData));
-        json.put("receiveNotifications", "#fr@gr@.com");
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, json.toString());
-    }
-
-    private void putUserDataAndExpectBadRequestErrorWithSingleMsg(Long id, String content) throws Exception {
+    private void putUserDataAndExpectBadRequestErrorWithSingleMsg(Long id, String content, String errorMsg) throws Exception {
         String responseBody = mockMvc.perform(put("/users/" + id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content))
@@ -440,6 +458,7 @@ public class UserControllerTest {
         assertEquals(error.getStatusCode(), HttpStatus.BAD_REQUEST.value());
         assertNotNull(error.getMessages());
         assertEquals(1, error.getMessages().size());
+        assertEquals(errorMsg, error.getMessages().get(0));
         assertNotNull(error.getTimestamp());
     }
 

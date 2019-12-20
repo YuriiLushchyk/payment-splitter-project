@@ -3,8 +3,9 @@ package com.eleks.userservice.advisor;
 import com.eleks.userservice.dto.ErrorDto;
 import com.eleks.userservice.exception.InvalidDateFormatException;
 import com.eleks.userservice.exception.ResourceNotFoundException;
-import com.eleks.userservice.exception.UserDataException;
+import com.eleks.userservice.exception.UniqueUserPropertiesViolationException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         return createError(HttpStatus.NOT_FOUND, Collections.singletonList(msg));
     }
 
-    @ExceptionHandler(UserDataException.class)
+    @ExceptionHandler(UniqueUserPropertiesViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ErrorDto handleBadUserDataException(Exception exception) {
@@ -49,8 +50,7 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         List<String> messages = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(fieldError ->
-                        String.format("%s %s", fieldError.getField(), fieldError.getDefaultMessage()))
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.toList());
 
         ErrorDto error = createError(status, messages);

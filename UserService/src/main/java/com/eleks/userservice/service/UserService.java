@@ -1,18 +1,19 @@
 package com.eleks.userservice.service;
 
-import com.eleks.userservice.dto.UserDto;
+import com.eleks.userservice.dto.user.UserRequestDto;
+import com.eleks.userservice.dto.user.UserResponseDto;
 
 import java.util.List;
 
 public interface UserService {
 
-    UserDto getUser(Long id);
+    UserResponseDto getUser(Long id);
 
-    List<UserDto> getUsers();
+    List<UserResponseDto> getUsers();
 
-    UserDto saveUser(UserDto user);
+    UserResponseDto saveUser(UserRequestDto user);
 
-    UserDto editUser(Long id, UserDto user);
+    UserResponseDto editUser(Long id, UserRequestDto user);
 
     void deleteUserById(Long id);
 }
