@@ -305,6 +305,145 @@ public class UserControllerTest {
     }
 
     @Test
+    public void editUser_WithoutUsername_ReturnBabRequestAndError() throws Exception {
+        Long id = 1L;
+        userData.setId(id);
+        userData.setUsername(null);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+    }
+
+    @Test
+    public void editUser_WithBlankUsername_ReturnBabRequestAndError() throws Exception {
+        Long id = 1L;
+        userData.setId(id);
+        userData.setUsername("");
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+    }
+
+    @Test
+    public void editUser_WithTooLongUsername_ReturnBabRequestAndError() throws Exception {
+        Long id = 1L;
+        userData.setId(id);
+        userData.setUsername(getRandomString(51));
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+    }
+
+    @Test
+    public void editUser_WithoutFirstName_ReturnBabRequestAndError() throws Exception {
+        Long id = 1L;
+        userData.setId(id);
+        userData.setFirstName(null);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+    }
+
+    @Test
+    public void editUser_WithBlankFirstName_ReturnBabRequestAndError() throws Exception {
+        Long id = 1L;
+        userData.setId(id);
+        userData.setFirstName("");
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+    }
+
+    @Test
+    public void editUser_WithTooLongFirstName_ReturnBabRequestAndError() throws Exception {
+        Long id = 1L;
+        userData.setId(id);
+        userData.setFirstName(getRandomString(51));
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+    }
+
+    @Test
+    public void editUser_WithoutLastName_ReturnBabRequestAndError() throws Exception {
+        Long id = 1L;
+        userData.setId(id);
+        userData.setLastName(null);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+    }
+
+    @Test
+    public void editUser_WithBlankLastName_ReturnBabRequestAndError() throws Exception {
+        Long id = 1L;
+        userData.setId(id);
+        userData.setLastName("");
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+    }
+
+    @Test
+    public void editUser_WithTooLongLastName_ReturnBabRequestAndError() throws Exception {
+        Long id = 1L;
+        userData.setId(id);
+        userData.setLastName(getRandomString(51));
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+    }
+
+    @Test
+    public void editUser_WithoutBirthDate_ReturnBabRequestAndError() throws Exception {
+        Long id = 1L;
+        userData.setId(id);
+        userData.setDateOfBirth(null);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+    }
+
+    @Test
+    public void editUser_WithWrongDateFormat_ReturnBabRequestAndError() throws Exception {
+        Long id = 1L;
+        userData.setId(id);
+        JSONObject json = new JSONObject(asJsonString(userData));
+        json.put("dateOfBirth", "2019-12-19");
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, json.toString());
+    }
+
+    @Test
+    public void editUser_WithoutEmail_ReturnBabRequestAndError() throws Exception {
+        Long id = 1L;
+        userData.setId(id);
+        userData.setEmail(null);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+    }
+
+    @Test
+    public void editUser_WithWrongEmailFormat_ReturnBabRequestAndError() throws Exception {
+        Long id = 1L;
+        userData.setId(id);
+        JSONObject json = new JSONObject(asJsonString(userData));
+        json.put("email", "#fr@gr@.com");
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, json.toString());
+    }
+
+    @Test
+    public void editUser_WithoutNotificationProp_ReturnBabRequestAndError() throws Exception {
+        Long id = 1L;
+        userData.setId(id);
+        userData.setReceiveNotifications(null);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userData));
+    }
+
+    @Test
+    public void editUser_InvalidNotificationProp_ReturnBabRequestAndError() throws Exception {
+        Long id = 1L;
+        userData.setId(id);
+        JSONObject json = new JSONObject(asJsonString(userData));
+        json.put("receiveNotifications", "#fr@gr@.com");
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, json.toString());
+    }
+
+    private void putUserDataAndExpectBadRequestErrorWithSingleMsg(Long id, String content) throws Exception {
+        String responseBody = mockMvc.perform(put("/users/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorDto error = jsonAsObject(responseBody, ErrorDto.class);
+
+        assertEquals(error.getStatusCode(), HttpStatus.BAD_REQUEST.value());
+        assertNotNull(error.getMessages());
+        assertEquals(1, error.getMessages().size());
+        assertNotNull(error.getTimestamp());
+    }
+
+    @Test
     public void deleteUser_UserExists_ReturnOk() throws Exception {
         Long id = 1L;
         mockMvc.perform(delete("/users/" + id))
