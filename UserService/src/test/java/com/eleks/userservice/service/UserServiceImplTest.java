@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -54,7 +55,7 @@ class UserServiceImplTest {
 
     @Test
     public void getUser_UserWithIdExists_ReturnUserModel() {
-        when(repository.findById(user.getId())).thenReturn(user);
+        when(repository.findById(user.getId())).thenReturn(Optional.of(user));
 
         UserResponseDto result = service.getUser(user.getId());
 
@@ -63,7 +64,7 @@ class UserServiceImplTest {
 
     @Test
     public void getUser_UserWithIdDoesntExist_ThrowException() {
-        when(repository.findById(user.getId())).thenReturn(null);
+        when(repository.findById(user.getId())).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> service.getUser(user.getId()));
 
@@ -94,9 +95,9 @@ class UserServiceImplTest {
 
     @Test
     public void saveUser_UserWithSuchUsernameOrEmailDoesntExist_ReturnSavedUser() {
-        when(repository.saveUser(any(User.class))).thenReturn(user);
-        when(repository.findByUsername(anyString())).thenReturn(null);
-        when(repository.findByEmail(anyString())).thenReturn(null);
+        when(repository.save(any(User.class))).thenReturn(user);
+        when(repository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(repository.findByEmail(anyString())).thenReturn(Optional.empty());
 
         UserResponseDto responseDto = service.saveUser(userRequestDto);
 
@@ -105,7 +106,7 @@ class UserServiceImplTest {
 
     @Test
     public void saveUser_UserWithSuchUsernameAlreadyExists_ThrowError() {
-        when(repository.findByUsername(anyString())).thenReturn(user);
+        when(repository.findByUsername(anyString())).thenReturn(Optional.of(user));
 
         Throwable throwable = assertThrows(UniqueUserPropertiesViolationException.class, () -> service.saveUser(userRequestDto));
         assertEquals("user with this username already exists", throwable.getMessage());
@@ -113,7 +114,7 @@ class UserServiceImplTest {
 
     @Test
     public void saveUser_UserWithSuchEmailAlreadyExists_ThrowError() {
-        when(repository.findByEmail(anyString())).thenReturn(user);
+        when(repository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         Throwable throwable = assertThrows(UniqueUserPropertiesViolationException.class, () -> service.saveUser(userRequestDto));
         assertEquals("user with this email already exists", throwable.getMessage());
@@ -122,8 +123,8 @@ class UserServiceImplTest {
     @Test
     public void editUser_UserIdExists_ReturnResponseDto() {
         Long id = 1L;
-        when(repository.findById(id)).thenReturn(user);
-        when(repository.saveUser(any(User.class))).thenReturn(user);
+        when(repository.findById(id)).thenReturn(Optional.of(user));
+        when(repository.save(any(User.class))).thenReturn(user);
 
         UserResponseDto responseDto = service.editUser(id, userRequestDto);
 
@@ -133,7 +134,7 @@ class UserServiceImplTest {
 
     @Test
     public void editUser_UserIdDoesntExist_ThrowResourceNotFoundException() {
-        when(repository.findById(anyLong())).thenReturn(null);
+        when(repository.findById(anyLong())).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> service.editUser(1L, userRequestDto));
         assertEquals("user with this id does't exist", exception.getMessage());
@@ -142,7 +143,7 @@ class UserServiceImplTest {
     @Test
     public void deleteById_UserWithIdExists_CallRepositoryDelete() {
         Long id = 1L;
-        when(repository.findById(id)).thenReturn(user);
+        when(repository.findById(id)).thenReturn(Optional.of(user));
 
         service.deleteUserById(id);
 
@@ -152,7 +153,7 @@ class UserServiceImplTest {
     @Test
     public void deleteById_UserWithIdDoesntExist_ThrowResourceNotExists() {
         Long id = 1L;
-        when(repository.findById(id)).thenReturn(null);
+        when(repository.findById(id)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> service.deleteUserById(id));
 

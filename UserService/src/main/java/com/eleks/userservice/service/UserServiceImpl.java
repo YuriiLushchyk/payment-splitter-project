@@ -22,12 +22,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUser(Long id) {
-        User user = repository.findById(id);
-        if (user == null) {
-            throw new ResourceNotFoundException("user with this id does't exist");
-        } else {
-            return mapper.toDto(user);
-        }
+        User user = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("user with this id does't exist"));
+        return mapper.toDto(user);
     }
 
     @Override
@@ -40,35 +36,35 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto saveUser(UserRequestDto user) {
-        if (repository.findByUsername(user.getUsername()) != null) {
+        if (repository.findByUsername(user.getUsername()).isPresent()) {
             throw new UniqueUserPropertiesViolationException("user with this username already exists");
-        } else if (repository.findByEmail(user.getEmail()) != null) {
+        } else if (repository.findByEmail(user.getEmail()).isPresent()) {
             throw new UniqueUserPropertiesViolationException("user with this email already exists");
         } else {
             User entity = mapper.toEntity(user);
-            User savedEntity = repository.saveUser(entity);
+            User savedEntity = repository.save(entity);
             return mapper.toDto(savedEntity);
         }
     }
 
     @Override
     public UserResponseDto editUser(Long id, UserRequestDto user) {
-        if (repository.findById(id) == null) {
-            throw new ResourceNotFoundException("user with this id does't exist");
-        } else {
+        if (repository.findById(id).isPresent()) {
             User entity = mapper.toEntity(user);
             entity.setId(id);
-            User saved = repository.saveUser(entity);
+            User saved = repository.save(entity);
             return mapper.toDto(saved);
+        } else {
+            throw new ResourceNotFoundException("user with this id does't exist");
         }
     }
 
     @Override
     public void deleteUserById(Long id) {
-        if (repository.findById(id) == null) {
-            throw new ResourceNotFoundException("user with this id does't exist");
-        } else {
+        if (repository.findById(id).isPresent()) {
             repository.deleteById(id);
+        } else {
+            throw new ResourceNotFoundException("user with this id does't exist");
         }
     }
 }

@@ -1,19 +1,12 @@
 package com.eleks.userservice.repository;
 
 import com.eleks.userservice.domain.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
+import java.util.Optional;
 
-public interface UserRepository {
-    User findById(Long id);
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByUsername(String username);
 
-    List<User> findAll();
-
-    User saveUser(User user);
-
-    User findByUsername(String username);
-
-    User findByEmail(String email);
-
-    void deleteById(Long id);
+    Optional<User> findByEmail(String email);
 }
