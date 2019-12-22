@@ -1,13 +1,161 @@
 package com.eleks.userservice.service;
 
+import com.eleks.userservice.domain.User;
+import com.eleks.userservice.dto.user.UserRequestDto;
+import com.eleks.userservice.dto.user.UserResponseDto;
+import com.eleks.userservice.exception.ResourceNotFoundException;
+import com.eleks.userservice.exception.UniqueUserPropertiesViolationException;
+import com.eleks.userservice.mapper.UserMapper;
+import com.eleks.userservice.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class UserServiceImplTest {
 
     private UserServiceImpl service;
+    private UserRepository repository;
+    private User user;
+    private UserRequestDto userRequestDto;
 
     @BeforeEach
     void setUp() {
-        service = new UserServiceImpl();
+        repository = mock(UserRepository.class);
+        UserMapper mapper = new UserMapper();
+        service = new UserServiceImpl(repository, mapper);
+
+        userRequestDto = UserRequestDto.builder()
+                .username("username")
+                .firstName("firstName")
+                .lastName("lastName")
+                .dateOfBirth(LocalDate.now())
+                .email("email@eleks.com")
+                .receiveNotifications(true)
+                .build();
+
+        user = User.builder()
+                .id(1L)
+                .username(userRequestDto.getUsername())
+                .firstName(userRequestDto.getFirstName())
+                .lastName(userRequestDto.getLastName())
+                .dateOfBirth(userRequestDto.getDateOfBirth())
+                .email(userRequestDto.getEmail())
+                .receiveNotifications(userRequestDto.getReceiveNotifications())
+                .build();
+    }
+
+    @Test
+    public void getUser_UserWithIdExists_ReturnUserModel() {
+        when(repository.findById(user.getId())).thenReturn(user);
+
+        UserResponseDto result = service.getUser(user.getId());
+
+        assertNotNull(result);
+    }
+
+    @Test
+    public void getUser_UserWithIdDoesntExist_ThrowException() {
+        when(repository.findById(user.getId())).thenReturn(null);
+
+        Exception exception = assertThrows(ResourceNotFoundException.class, () -> service.getUser(user.getId()));
+
+        assertEquals("user with this id does't exist", exception.getMessage());
+    }
+
+    @Test
+    public void getUsers_ListOfUsersExists_ReturnList() {
+        List<User> repoList = Arrays.asList(
+                User.builder().id(1L).build(),
+                User.builder().id(2L).build(),
+                User.builder().id(3L).build()
+        );
+
+        when(repository.findAll()).thenReturn(repoList);
+
+        assertEquals(repoList.size(), service.getUsers().size());
+    }
+
+    @Test
+    public void getUsers_NoUsersInRepository_ReturnEmptyList() {
+        List<User> repoList = Collections.emptyList();
+
+        when(repository.findAll()).thenReturn(repoList);
+
+        assertEquals(0, service.getUsers().size());
+    }
+
+    @Test
+    public void saveUser_UserWithSuchUsernameOrEmailDoesntExist_ReturnSavedUser() {
+        when(repository.saveUser(any(User.class))).thenReturn(user);
+        when(repository.findByUsername(anyString())).thenReturn(null);
+        when(repository.findByEmail(anyString())).thenReturn(null);
+
+        UserResponseDto responseDto = service.saveUser(userRequestDto);
+
+        assertNotNull(responseDto);
+    }
+
+    @Test
+    public void saveUser_UserWithSuchUsernameAlreadyExists_ThrowError() {
+        when(repository.findByUsername(anyString())).thenReturn(user);
+
+        Throwable throwable = assertThrows(UniqueUserPropertiesViolationException.class, () -> service.saveUser(userRequestDto));
+        assertEquals("user with this username already exists", throwable.getMessage());
+    }
+
+    @Test
+    public void saveUser_UserWithSuchEmailAlreadyExists_ThrowError() {
+        when(repository.findByEmail(anyString())).thenReturn(user);
+
+        Throwable throwable = assertThrows(UniqueUserPropertiesViolationException.class, () -> service.saveUser(userRequestDto));
+        assertEquals("user with this email already exists", throwable.getMessage());
+    }
+
+    @Test
+    public void editUser_UserIdExists_ReturnResponseDto() {
+        Long id = 1L;
+        when(repository.findById(id)).thenReturn(user);
+        when(repository.saveUser(any(User.class))).thenReturn(user);
+
+        UserResponseDto responseDto = service.editUser(id, userRequestDto);
+
+        assertNotNull(responseDto);
+        assertEquals(id, responseDto.getId());
+    }
+
+    @Test
+    public void editUser_UserIdDoesntExist_ThrowResourceNotFoundException() {
+        when(repository.findById(anyLong())).thenReturn(null);
+
+        Exception exception = assertThrows(ResourceNotFoundException.class, () -> service.editUser(1L, userRequestDto));
+        assertEquals("user with this id does't exist", exception.getMessage());
+    }
+
+    @Test
+    public void deleteById_UserWithIdExists_CallRepositoryDelete() {
+        Long id = 1L;
+        when(repository.findById(id)).thenReturn(user);
+
+        service.deleteUserById(id);
+
+        verify(repository).deleteById(id);
+    }
+
+    @Test
+    public void deleteById_UserWithIdDoesntExist_ThrowResourceNotExists() {
+        Long id = 1L;
+        when(repository.findById(id)).thenReturn(null);
+
+        Exception exception = assertThrows(ResourceNotFoundException.class, () -> service.deleteUserById(id));
+
+        assertEquals("user with this id does't exist", exception.getMessage());
     }
 }
