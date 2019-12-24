@@ -7,6 +7,7 @@ import com.eleks.userservice.dto.user.UserResponseDto;
 import com.eleks.userservice.exception.ResourceNotFoundException;
 import com.eleks.userservice.exception.UniqueUserPropertiesViolationException;
 import com.eleks.userservice.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static com.eleks.userservice.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.*;
@@ -42,6 +42,9 @@ public class UserControllerTest {
 
     @Autowired
     private UserController controller;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private UserRequestDto userRequestDto;
 
@@ -80,7 +83,7 @@ public class UserControllerTest {
         mockMvc.perform(get("/users/" + userResponseDto.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(asJsonString(userResponseDto)));
+                .andExpect(content().json(objectMapper.writeValueAsString(userResponseDto)));
     }
 
 
@@ -96,7 +99,7 @@ public class UserControllerTest {
                 .andReturn()
                 .getResponse().getContentAsString();
 
-        ErrorDto error = jsonAsObject(responseBody, ErrorDto.class);
+        ErrorDto error = objectMapper.readValue(responseBody, ErrorDto.class);
         assertEquals(error.getStatusCode(), HttpStatus.NOT_FOUND.value());
         assertEquals(exception.getMessage(), error.getMessages().get(0));
         assertNotNull(error.getTimestamp());
@@ -113,7 +116,7 @@ public class UserControllerTest {
         mockMvc.perform(get("/users/"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(asJsonString(list)));
+                .andExpect(content().json(objectMapper.writeValueAsString(list)));
     }
 
     @Test
@@ -125,7 +128,7 @@ public class UserControllerTest {
         mockMvc.perform(get("/users/"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(asJsonString(list)));
+                .andExpect(content().json(objectMapper.writeValueAsString(list)));
     }
 
     @Test
@@ -134,10 +137,10 @@ public class UserControllerTest {
 
         mockMvc.perform(post("/users/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(userRequestDto)))
+                .content(objectMapper.writeValueAsString(userRequestDto)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(asJsonString(userResponseDto)));
+                .andExpect(content().json(objectMapper.writeValueAsString(userResponseDto)));
     }
 
     @Test
@@ -148,12 +151,12 @@ public class UserControllerTest {
 
         String responseBody = mockMvc.perform(post("/users/")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(userRequestDto)))
+                .content(objectMapper.writeValueAsString(userRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
 
-        ErrorDto error = jsonAsObject(responseBody, ErrorDto.class);
+        ErrorDto error = objectMapper.readValue(responseBody, ErrorDto.class);
 
         assertEquals(error.getStatusCode(), HttpStatus.BAD_REQUEST.value());
         assertNotNull(error.getMessages());
@@ -165,75 +168,75 @@ public class UserControllerTest {
     public void createUser_WithoutUsername_ReturnBadRequestAndError() throws Exception {
         userRequestDto.setUsername(null);
         String errorMsg = "username is required";
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void createUser_WithBlankUsername_ReturnBadRequestAndError() throws Exception {
         userRequestDto.setUsername("");
         String errorMsg = "username length should be between 1 and 50";
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void createUser_WithTooLongUsername_ReturnBadRequestAndError() throws Exception {
-        userRequestDto.setUsername(getRandomString(51));
+        userRequestDto.setUsername(RANDOM_51_STRING);
         String errorMsg = "username length should be between 1 and 50";
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void createUser_WithoutFirstName_ReturnBadRequestAndError() throws Exception {
         userRequestDto.setFirstName(null);
         String errorMsg = "firstName is required";
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void createUser_WithBlankFirstName_ReturnBadRequestAndError() throws Exception {
         userRequestDto.setFirstName("");
         String errorMsg = "firstName length should be between 1 and 50";
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void createUser_WithTooLongFirstName_ReturnBadRequestAndError() throws Exception {
-        userRequestDto.setFirstName(getRandomString(51));
+        userRequestDto.setFirstName(RANDOM_51_STRING);
         String errorMsg = "firstName length should be between 1 and 50";
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void createUser_WithoutLastName_ReturnBadRequestAndError() throws Exception {
         userRequestDto.setLastName(null);
         String errorMsg = "lastName is required";
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void createUser_WithBlankLastName_ReturnBadRequestAndError() throws Exception {
         userRequestDto.setLastName("");
         String errorMsg = "lastName length should be between 1 and 50";
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void createUser_WithTooLongLastName_ReturnBadRequestAndError() throws Exception {
-        userRequestDto.setLastName(getRandomString(51));
+        userRequestDto.setLastName(RANDOM_51_STRING);
         String errorMsg = "lastName length should be between 1 and 50";
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void createUser_WithoutBirthDate_ReturnBadRequestAndError() throws Exception {
         userRequestDto.setDateOfBirth(null);
         String errorMsg = "dateOfBirth is required";
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void createUser_WithWrongDateFormat_ReturnBadRequestAndError() throws Exception {
-        JSONObject json = new JSONObject(asJsonString(userRequestDto));
+        JSONObject json = new JSONObject(objectMapper.writeValueAsString(userRequestDto));
         json.put("dateOfBirth", "2019-12-19");
         String errorMsg = "Incorrect date format of dateOfBirth. Valid pattern is dd-MM-yyyy";
         postUserDataAndExpectBadRequestErrorWithSingleMsg(json.toString(), errorMsg);
@@ -243,12 +246,12 @@ public class UserControllerTest {
     public void createUser_WithoutEmail_ReturnBadRequestAndError() throws Exception {
         userRequestDto.setEmail(null);
         String errorMsg = "email is required";
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void createUser_WithWrongEmailFormat_ReturnBadRequestAndError() throws Exception {
-        JSONObject json = new JSONObject(asJsonString(userRequestDto));
+        JSONObject json = new JSONObject(objectMapper.writeValueAsString(userRequestDto));
         json.put("email", "#fr@gr@.com");
         String errorMsg = "email string has to be a well-formed email address";
         postUserDataAndExpectBadRequestErrorWithSingleMsg(json.toString(), errorMsg);
@@ -258,7 +261,7 @@ public class UserControllerTest {
     public void createUser_WithoutNotificationProp_ReturnBadRequestAndError() throws Exception {
         userRequestDto.setReceiveNotifications(null);
         String errorMsg = "receiveNotifications is required";
-        postUserDataAndExpectBadRequestErrorWithSingleMsg(asJsonString(userRequestDto), errorMsg);
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     private void postUserDataAndExpectBadRequestErrorWithSingleMsg(String content, String errorMsg) throws Exception {
@@ -269,7 +272,7 @@ public class UserControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
 
-        ErrorDto error = jsonAsObject(responseBody, ErrorDto.class);
+        ErrorDto error = objectMapper.readValue(responseBody, ErrorDto.class);
 
         assertEquals(error.getStatusCode(), HttpStatus.BAD_REQUEST.value());
         assertNotNull(error.getMessages());
@@ -280,7 +283,7 @@ public class UserControllerTest {
 
     @Test
     public void createUser_InvalidNotificationProp_ReturnBadRequestAndError() throws Exception {
-        JSONObject json = new JSONObject(asJsonString(userRequestDto));
+        JSONObject json = new JSONObject(objectMapper.writeValueAsString(userRequestDto));
         json.put("receiveNotifications", "#fr@gr@.com");
         String errorMsg = "username can't be null";
 
@@ -291,7 +294,7 @@ public class UserControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
 
-        ErrorDto error = jsonAsObject(responseBody, ErrorDto.class);
+        ErrorDto error = objectMapper.readValue(responseBody, ErrorDto.class);
 
         assertEquals(error.getStatusCode(), HttpStatus.BAD_REQUEST.value());
         assertNotNull(error.getMessages());
@@ -305,10 +308,10 @@ public class UserControllerTest {
 
         mockMvc.perform(put("/users/" + userResponseDto.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(userRequestDto)))
+                .content(objectMapper.writeValueAsString(userRequestDto)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(asJsonString(userResponseDto)));
+                .andExpect(content().json(objectMapper.writeValueAsString(userResponseDto)));
     }
 
     @Test
@@ -318,12 +321,12 @@ public class UserControllerTest {
 
         String responseBody = mockMvc.perform(put("/users/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(userResponseDto)))
+                .content(objectMapper.writeValueAsString(userResponseDto)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
 
-        ErrorDto error = jsonAsObject(responseBody, ErrorDto.class);
+        ErrorDto error = objectMapper.readValue(responseBody, ErrorDto.class);
 
         assertEquals(error.getStatusCode(), HttpStatus.NOT_FOUND.value());
         assertNotNull(error.getMessages());
@@ -336,7 +339,7 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setUsername(null);
         String errorMsg = "username is required";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -344,15 +347,15 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setUsername("");
         String errorMsg = "username length should be between 1 and 50";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void editUser_WithTooLongUsername_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userRequestDto.setUsername(getRandomString(51));
+        userRequestDto.setUsername(RANDOM_51_STRING);
         String errorMsg = "username length should be between 1 and 50";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -360,7 +363,7 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setFirstName(null);
         String errorMsg = "firstName is required";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -368,15 +371,15 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setFirstName("");
         String errorMsg = "firstName length should be between 1 and 50";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void editUser_WithTooLongFirstName_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userRequestDto.setFirstName(getRandomString(51));
+        userRequestDto.setFirstName(RANDOM_51_STRING);
         String errorMsg = "firstName length should be between 1 and 50";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -384,7 +387,7 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setLastName(null);
         String errorMsg = "lastName is required";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -392,15 +395,15 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setLastName("");
         String errorMsg = "lastName length should be between 1 and 50";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void editUser_WithTooLongLastName_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        userRequestDto.setLastName(getRandomString(51));
+        userRequestDto.setLastName(RANDOM_51_STRING);
         String errorMsg = "lastName length should be between 1 and 50";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -408,13 +411,13 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setDateOfBirth(null);
         String errorMsg = "dateOfBirth is required";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void editUser_WithWrongDateFormat_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        JSONObject json = new JSONObject(asJsonString(userRequestDto));
+        JSONObject json = new JSONObject(objectMapper.writeValueAsString(userRequestDto));
         json.put("dateOfBirth", "2019-12-19");
         String errorMsg = "Incorrect date format of dateOfBirth. Valid pattern is dd-MM-yyyy";
         putUserDataAndExpectBadRequestErrorWithSingleMsg(id, json.toString(), errorMsg);
@@ -425,13 +428,13 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setEmail(null);
         String errorMsg = "email is required";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
     public void editUser_WithWrongEmailFormat_ReturnBadRequestAndError() throws Exception {
         Long id = 1L;
-        JSONObject json = new JSONObject(asJsonString(userRequestDto));
+        JSONObject json = new JSONObject(objectMapper.writeValueAsString(userRequestDto));
         json.put("email", "#fr@gr@.com");
         String errorMsg = "email string has to be a well-formed email address";
         putUserDataAndExpectBadRequestErrorWithSingleMsg(id, json.toString(), errorMsg);
@@ -442,7 +445,7 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setReceiveNotifications(null);
         String errorMsg = "receiveNotifications is required";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, asJsonString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     private void putUserDataAndExpectBadRequestErrorWithSingleMsg(Long id, String content, String errorMsg) throws Exception {
@@ -453,7 +456,7 @@ public class UserControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
 
-        ErrorDto error = jsonAsObject(responseBody, ErrorDto.class);
+        ErrorDto error = objectMapper.readValue(responseBody, ErrorDto.class);
 
         assertEquals(error.getStatusCode(), HttpStatus.BAD_REQUEST.value());
         assertNotNull(error.getMessages());
@@ -482,11 +485,13 @@ public class UserControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
 
-        ErrorDto error = jsonAsObject(responseBody, ErrorDto.class);
+        ErrorDto error = objectMapper.readValue(responseBody, ErrorDto.class);
 
         assertEquals(error.getStatusCode(), HttpStatus.NOT_FOUND.value());
         assertNotNull(error.getMessages());
         assertEquals(1, error.getMessages().size());
         assertNotNull(error.getTimestamp());
     }
+
+    private static String RANDOM_51_STRING = "JZSfzulP8b9whnGwqRKuJZSfzulP8b9whnGwqRKuJZSfzulP8bq";
 }
