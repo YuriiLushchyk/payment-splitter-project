@@ -1,7 +1,11 @@
 package com.eleks.groupservice.repository;
 
 import com.eleks.groupservice.domain.Group;
+import org.springframework.stereotype.Repository;
 
-public interface GroupRepository {
-    Group save(Group group);
+@Repository
+public class GroupRepository {
+    public Group save(Group group) {
+        return null;
+    }
 }
