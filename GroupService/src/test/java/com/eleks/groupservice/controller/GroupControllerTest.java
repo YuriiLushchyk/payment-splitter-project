@@ -1,10 +1,11 @@
 package com.eleks.groupservice.controller;
 
+import com.eleks.groupservice.advisor.ResponseExceptionHandler;
 import com.eleks.groupservice.domain.Currency;
 import com.eleks.groupservice.dto.ErrorDto;
 import com.eleks.groupservice.dto.GroupRequestDto;
 import com.eleks.groupservice.dto.GroupResponseDto;
-import com.eleks.groupservice.exception.InvalidGroupsMembersIdsException;
+import com.eleks.groupservice.exception.GroupMembersIdsValidationException;
 import com.eleks.groupservice.exception.UserServiceException;
 import com.eleks.groupservice.service.GroupService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,6 +49,7 @@ class GroupControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = standaloneSetup(controller)
+                .setControllerAdvice(new ResponseExceptionHandler())
                 .build();
 
         requestDto = GroupRequestDto.builder()
@@ -126,7 +128,7 @@ class GroupControllerTest {
 
     @Test
     void saveGroup_GroupMembersIdsAreInvalid_ShouldReturnBadRequestAndErrorWithMsgFromException() throws Exception {
-        Exception error = new InvalidGroupsMembersIdsException("msg");
+        Exception error = new GroupMembersIdsValidationException("msg");
 
         when(groupService.saveGroup(any(GroupRequestDto.class))).thenThrow(error);
 
