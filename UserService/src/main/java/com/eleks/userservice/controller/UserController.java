@@ -1,5 +1,6 @@
 package com.eleks.userservice.controller;
 
+import com.eleks.userservice.dto.UserSearchDto;
 import com.eleks.userservice.dto.user.UserRequestDto;
 import com.eleks.userservice.dto.user.UserResponseDto;
 import com.eleks.userservice.service.UserService;
@@ -42,4 +43,10 @@ public class UserController {
     public void deleteUser(@PathVariable Long id) {
         service.deleteUserById(id);
     }
+
+    @PostMapping("/users/search")
+    public List<UserResponseDto> searchUser(@RequestBody UserSearchDto searchDto) {
+        return service.searchUsers(searchDto);
+    }
+
 }
