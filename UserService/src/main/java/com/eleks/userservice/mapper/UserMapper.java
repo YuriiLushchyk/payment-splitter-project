@@ -3,14 +3,12 @@ package com.eleks.userservice.mapper;
 import com.eleks.userservice.domain.User;
 import com.eleks.userservice.dto.user.UserRequestDto;
 import com.eleks.userservice.dto.user.UserResponseDto;
-import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-@Component
 public class UserMapper {
 
-    public User toEntity(UserRequestDto dto) {
+    public static User toEntity(UserRequestDto dto) {
         if (Objects.isNull(dto)) {
             return null;
         } else {
@@ -25,7 +23,7 @@ public class UserMapper {
         }
     }
 
-    public UserResponseDto toDto(User entity) {
+    public static UserResponseDto toDto(User entity) {
         if (Objects.isNull(entity)) {
             return null;
         } else {

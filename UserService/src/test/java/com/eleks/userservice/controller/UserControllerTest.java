@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -79,7 +80,7 @@ public class UserControllerTest {
 
     @Test
     public void getUser_userExits_ReturnOK() throws Exception {
-        when(service.getUser(userResponseDto.getId())).thenReturn(userResponseDto);
+        when(service.getUser(userResponseDto.getId())).thenReturn(Optional.of(userResponseDto));
 
         mockMvc.perform(get("/users/" + userResponseDto.getId()))
                 .andExpect(status().isOk())
@@ -91,8 +92,7 @@ public class UserControllerTest {
     @Test
     public void getUser_userDoesntExits_ReturnNotFoundAndError() throws Exception {
         Long id = 1L;
-        Throwable exception = new ResourceNotFoundException("msg");
-        when(service.getUser(id)).thenThrow(exception);
+        when(service.getUser(id)).thenReturn(Optional.empty());
 
         String responseBody = mockMvc.perform(get("/users/" + id))
                 .andExpect(status().isNotFound())
@@ -102,7 +102,7 @@ public class UserControllerTest {
 
         ErrorDto error = objectMapper.readValue(responseBody, ErrorDto.class);
         assertEquals(error.getStatusCode(), HttpStatus.NOT_FOUND.value());
-        assertEquals(exception.getMessage(), error.getMessages().get(0));
+        assertEquals("user with this id does't exist", error.getMessages().get(0));
         assertNotNull(error.getTimestamp());
     }
 

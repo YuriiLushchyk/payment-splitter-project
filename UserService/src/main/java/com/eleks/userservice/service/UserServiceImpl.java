@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,42 +21,40 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
-    private final UserMapper mapper;
 
     @Override
-    public UserResponseDto getUser(Long id) {
-        User user = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("user with this id does't exist"));
-        return mapper.toDto(user);
+    public Optional<UserResponseDto> getUser(Long id) {
+        return repository.findById(id).map(UserMapper::toDto);
     }
 
     @Override
     public List<UserResponseDto> getUsers() {
         return repository.findAll()
                 .stream()
-                .map(mapper::toDto)
+                .map(UserMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public UserResponseDto saveUser(UserRequestDto user) {
+    public UserResponseDto saveUser(UserRequestDto user) throws UniqueUserPropertiesViolationException {
         if (repository.findByUsername(user.getUsername()).isPresent()) {
             throw new UniqueUserPropertiesViolationException("user with this username already exists");
         } else if (repository.findByEmail(user.getEmail()).isPresent()) {
             throw new UniqueUserPropertiesViolationException("user with this email already exists");
         } else {
-            User entity = mapper.toEntity(user);
+            User entity = UserMapper.toEntity(user);
             User savedEntity = repository.save(entity);
-            return mapper.toDto(savedEntity);
+            return UserMapper.toDto(savedEntity);
         }
     }
 
     @Override
     public UserResponseDto editUser(Long id, UserRequestDto user) {
         if (repository.findById(id).isPresent()) {
-            User entity = mapper.toEntity(user);
+            User entity = UserMapper.toEntity(user);
             entity.setId(id);
             User saved = repository.save(entity);
-            return mapper.toDto(saved);
+            return UserMapper.toDto(saved);
         } else {
             throw new ResourceNotFoundException("user with this id does't exist");
         }
@@ -64,7 +63,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserResponseDto> searchUsers(UserSearchDto searchDto) {
         List<User> users = repository.findAllByIdIn(searchDto.getUserIds()).orElse(Collections.emptyList());
-        return users.stream().map(mapper::toDto).collect(Collectors.toList());
+        return users.stream().map(UserMapper::toDto).collect(Collectors.toList());
     }
 
     @Override

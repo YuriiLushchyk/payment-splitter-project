@@ -3,7 +3,6 @@ package com.eleks.userservice.mapper;
 import com.eleks.userservice.domain.User;
 import com.eleks.userservice.dto.user.UserRequestDto;
 import com.eleks.userservice.dto.user.UserResponseDto;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -12,13 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 class UserMapperTest {
-
-    private UserMapper mapper;
-
-    @BeforeEach
-    void setUp() {
-        mapper = new UserMapper();
-    }
 
     @Test
     void toEntity() {
@@ -31,7 +23,7 @@ class UserMapperTest {
                 .receiveNotifications(true)
                 .build();
 
-        User user = mapper.toEntity(request);
+        User user = UserMapper.toEntity(request);
 
         assertNull(user.getId());
         assertEquals(request.getUsername(), user.getUsername());
@@ -54,7 +46,7 @@ class UserMapperTest {
                 .receiveNotifications(true)
                 .build();
 
-        UserResponseDto userResponseDto = mapper.toDto(user);
+        UserResponseDto userResponseDto = UserMapper.toDto(user);
 
         assertEquals(user.getId(), userResponseDto.getId());
         assertEquals(user.getUsername(), userResponseDto.getUsername());

@@ -5,10 +5,11 @@ import com.eleks.userservice.dto.user.UserRequestDto;
 import com.eleks.userservice.dto.user.UserResponseDto;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
 
-    UserResponseDto getUser(Long id);
+    Optional<UserResponseDto> getUser(Long id);
 
     List<UserResponseDto> getUsers();
 

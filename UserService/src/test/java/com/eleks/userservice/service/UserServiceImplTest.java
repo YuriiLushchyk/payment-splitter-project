@@ -6,7 +6,6 @@ import com.eleks.userservice.dto.user.UserRequestDto;
 import com.eleks.userservice.dto.user.UserResponseDto;
 import com.eleks.userservice.exception.ResourceNotFoundException;
 import com.eleks.userservice.exception.UniqueUserPropertiesViolationException;
-import com.eleks.userservice.mapper.UserMapper;
 import com.eleks.userservice.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,8 +30,7 @@ class UserServiceImplTest {
     @BeforeEach
     void setUp() {
         repository = mock(UserRepository.class);
-        UserMapper mapper = new UserMapper();
-        service = new UserServiceImpl(repository, mapper);
+        service = new UserServiceImpl(repository);
 
         userRequestDto = UserRequestDto.builder()
                 .username("username")
@@ -58,18 +56,18 @@ class UserServiceImplTest {
     public void getUser_UserWithIdExists_ReturnUserModel() {
         when(repository.findById(user.getId())).thenReturn(Optional.of(user));
 
-        UserResponseDto result = service.getUser(user.getId());
+        Optional<UserResponseDto> result = service.getUser(user.getId());
 
-        assertNotNull(result);
+        assertTrue(result.isPresent());
     }
 
     @Test
-    public void getUser_UserWithIdDoesntExist_ThrowException() {
+    public void getUser_UserWithIdDoesntExist_ReturnNothing() {
         when(repository.findById(user.getId())).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(ResourceNotFoundException.class, () -> service.getUser(user.getId()));
+        Optional<UserResponseDto> result = service.getUser(user.getId());
 
-        assertEquals("user with this id does't exist", exception.getMessage());
+        assertFalse(result.isPresent());
     }
 
     @Test
@@ -106,7 +104,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void saveUser_UserWithSuchUsernameAlreadyExists_ThrowError() {
+    public void saveUser_UserWithSuchUsernameAlreadyExists_ThrowUniqueUserPropertiesViolationException() {
         when(repository.findByUsername(anyString())).thenReturn(Optional.of(user));
 
         Throwable throwable = assertThrows(UniqueUserPropertiesViolationException.class, () -> service.saveUser(userRequestDto));

@@ -3,6 +3,7 @@ package com.eleks.userservice.controller;
 import com.eleks.userservice.dto.UserSearchDto;
 import com.eleks.userservice.dto.user.UserRequestDto;
 import com.eleks.userservice.dto.user.UserResponseDto;
+import com.eleks.userservice.exception.ResourceNotFoundException;
 import com.eleks.userservice.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,7 @@ public class UserController {
 
     @GetMapping("/users/{id}")
     public UserResponseDto getUser(@PathVariable Long id) {
-        return service.getUser(id);
+        return service.getUser(id).orElseThrow(() -> new ResourceNotFoundException("user with this id does't exist"));
     }
 
     @GetMapping("/users")
