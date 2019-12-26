@@ -2,6 +2,7 @@ package com.eleks.userservice.controller;
 
 import com.eleks.userservice.advisor.ResponseExceptionHandler;
 import com.eleks.userservice.dto.ErrorDto;
+import com.eleks.userservice.dto.UserSearchDto;
 import com.eleks.userservice.dto.user.UserRequestDto;
 import com.eleks.userservice.dto.user.UserResponseDto;
 import com.eleks.userservice.exception.ResourceNotFoundException;
@@ -491,6 +492,33 @@ public class UserControllerTest {
         assertNotNull(error.getMessages());
         assertEquals(1, error.getMessages().size());
         assertNotNull(error.getTimestamp());
+    }
+
+    @Test
+    public void searchUsers_PostSearchParams_ShouldReturnOkAndListOfResults() throws Exception {
+        UserSearchDto searchDto = new UserSearchDto(Collections.singletonList(1L));
+        List<UserResponseDto> result = Collections.singletonList(UserResponseDto.builder().id(1L).build());
+
+        when(service.searchUsers(any(UserSearchDto.class))).thenReturn(result);
+
+        mockMvc.perform(post("/users/search")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(searchDto)))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(result)));
+    }
+
+    @Test
+    public void searchUsers_PostSearchParams_ShouldReturnOkAndEmptyList() throws Exception {
+        UserSearchDto searchDto = new UserSearchDto(Collections.singletonList(1L));
+
+        when(service.searchUsers(any(UserSearchDto.class))).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(post("/users/search")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(searchDto)))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(Collections.emptyList())));
     }
 
     private static String RANDOM_51_STRING = "JZSfzulP8b9whnGwqRKuJZSfzulP8b9whnGwqRKuJZSfzulP8bq";

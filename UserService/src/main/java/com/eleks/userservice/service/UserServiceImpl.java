@@ -1,6 +1,7 @@
 package com.eleks.userservice.service;
 
 import com.eleks.userservice.domain.User;
+import com.eleks.userservice.dto.UserSearchDto;
 import com.eleks.userservice.dto.user.UserRequestDto;
 import com.eleks.userservice.dto.user.UserResponseDto;
 import com.eleks.userservice.exception.ResourceNotFoundException;
@@ -57,6 +58,11 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new ResourceNotFoundException("user with this id does't exist");
         }
+    }
+
+    @Override
+    public List<UserResponseDto> searchUsers(UserSearchDto searchDto) {
+        return null;
     }
 
     @Override
