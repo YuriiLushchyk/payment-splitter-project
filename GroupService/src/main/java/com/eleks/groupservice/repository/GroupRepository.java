@@ -1,11 +1,7 @@
 package com.eleks.groupservice.repository;
 
 import com.eleks.groupservice.domain.Group;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Repository
-public class GroupRepository {
-    public Group save(Group group) {
-        return null;
-    }
+public interface GroupRepository extends JpaRepository<Group, Long> {
 }
