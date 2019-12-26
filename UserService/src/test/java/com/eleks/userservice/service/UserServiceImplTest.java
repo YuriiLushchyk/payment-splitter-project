@@ -1,6 +1,7 @@
 package com.eleks.userservice.service;
 
 import com.eleks.userservice.domain.User;
+import com.eleks.userservice.dto.UserSearchDto;
 import com.eleks.userservice.dto.user.UserRequestDto;
 import com.eleks.userservice.dto.user.UserResponseDto;
 import com.eleks.userservice.exception.ResourceNotFoundException;
@@ -158,5 +159,31 @@ class UserServiceImplTest {
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> service.deleteUserById(id));
 
         assertEquals("user with this id does't exist", exception.getMessage());
+    }
+
+    @Test
+    public void searchUsers_RepositoryReturnsNotEmptyList_ShouldReturnListOfResponses() {
+        List<Long> ids = Arrays.asList(1L, 2L);
+        List<User> repoList = Arrays.asList(
+                User.builder().id(1L).build(),
+                User.builder().id(2L).build()
+        );
+
+        when(repository.findAllByIdIn(ids)).thenReturn(Optional.of(repoList));
+
+        List<UserResponseDto> responseList = service.searchUsers(new UserSearchDto(ids));
+
+        assertEquals(repoList.size(), responseList.size());
+    }
+
+    @Test
+    public void searchUsers_RepositoryReturnsNothing_ShouldReturnEmptyListOfResponses() {
+        List<Long> ids = Arrays.asList(1L, 2L);
+
+        when(repository.findAllByIdIn(ids)).thenReturn(Optional.empty());
+
+        List<UserResponseDto> responseList = service.searchUsers(new UserSearchDto(ids));
+
+        assertTrue(responseList.isEmpty());
     }
 }
