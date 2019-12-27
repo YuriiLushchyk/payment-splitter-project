@@ -4,7 +4,6 @@ import com.eleks.groupservice.domain.Currency;
 import com.eleks.groupservice.domain.Group;
 import com.eleks.groupservice.dto.GroupRequestDto;
 import com.eleks.groupservice.dto.GroupResponseDto;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -14,13 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 class GroupMapperTest {
 
-    private GroupMapper mapper;
-
-    @BeforeEach
-    void setUp() {
-        mapper = new GroupMapper();
-    }
-
     @Test
     void toEntity_NotNullDto_ReturnEntity() {
         GroupRequestDto dto = GroupRequestDto.builder()
@@ -29,7 +21,7 @@ class GroupMapperTest {
                 .members(Arrays.asList(1L, 2L, 3L))
                 .build();
 
-        Group entity = mapper.toEntity(dto);
+        Group entity = GroupMapper.toEntity(dto);
 
         assertNull(entity.getId());
         assertEquals(dto.getGroupName(), entity.getGroupName());
@@ -39,7 +31,7 @@ class GroupMapperTest {
 
     @Test
     void toEntity_NullDto_ReturnNull() {
-        assertNull(mapper.toEntity(null));
+        assertNull(GroupMapper.toEntity(null));
     }
 
     @Test
@@ -51,7 +43,7 @@ class GroupMapperTest {
                 .members(Arrays.asList(1L, 2L, 3L))
                 .build();
 
-        GroupResponseDto dto = mapper.toDto(entity);
+        GroupResponseDto dto = GroupMapper.toDto(entity);
 
         assertEquals(entity.getId(), dto.getId());
         assertEquals(entity.getGroupName(), dto.getGroupName());
@@ -61,6 +53,6 @@ class GroupMapperTest {
 
     @Test
     void toDto_NullEntity_ReturnNull() {
-        assertNull(mapper.toDto(null));
+        assertNull(GroupMapper.toDto(null));
     }
 }

@@ -15,13 +15,11 @@ public class GroupServiceImpl implements GroupService {
 
     private GroupRepository repository;
     private UserClient client;
-    private GroupMapper mapper;
 
     @Autowired
-    public GroupServiceImpl(GroupRepository repository, UserClient client, GroupMapper mapper) {
+    public GroupServiceImpl(GroupRepository repository, UserClient client) {
         this.repository = repository;
         this.client = client;
-        this.mapper = mapper;
     }
 
     @Override
@@ -29,8 +27,8 @@ public class GroupServiceImpl implements GroupService {
         if (!client.areUserIdsValid(group.getMembers())) {
             throw new GroupMembersIdsValidationException("Group contains non existing user's ids");
         }
-        Group entity = mapper.toEntity(group);
+        Group entity = GroupMapper.toEntity(group);
         Group savedEntity = repository.save(entity);
-        return mapper.toDto(savedEntity);
+        return GroupMapper.toDto(savedEntity);
     }
 }

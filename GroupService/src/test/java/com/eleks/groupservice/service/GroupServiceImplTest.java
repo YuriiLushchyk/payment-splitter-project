@@ -6,7 +6,6 @@ import com.eleks.groupservice.domain.Group;
 import com.eleks.groupservice.dto.GroupRequestDto;
 import com.eleks.groupservice.dto.GroupResponseDto;
 import com.eleks.groupservice.exception.GroupMembersIdsValidationException;
-import com.eleks.groupservice.mapper.GroupMapper;
 import com.eleks.groupservice.repository.GroupRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +36,7 @@ class GroupServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        service = new GroupServiceImpl(repository, client, new GroupMapper());
+        service = new GroupServiceImpl(repository, client);
 
         requestDto = GroupRequestDto.builder()
                 .groupName("groupName")
