@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class UserClientTest {
 
-    static WireMockServer wm = new WireMockServer(8081);
+    static WireMockServer wm = new WireMockServer(7777);
 
     static List<Long> userIds;
 
