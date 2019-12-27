@@ -5,6 +5,7 @@ import com.eleks.userservice.exception.InvalidDateFormatException;
 import com.eleks.userservice.exception.ResourceNotFoundException;
 import com.eleks.userservice.exception.UniqueUserPropertiesViolationException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,12 +25,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
+@Slf4j
 public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
     public ErrorDto handleNotFoundException(Exception exception) {
+        log.info("handleNotFoundException, " + exception.getMessage());
         String msg = exception.getMessage() == null ? "Resource not found" : exception.getMessage();
         return createError(HttpStatus.NOT_FOUND, Collections.singletonList(msg));
     }
@@ -38,6 +41,7 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ErrorDto handleBadUserDataException(Exception exception) {
+        log.info("handleBadUserDataException, " + exception.getMessage());
         String msg = exception.getMessage() == null ? "User data is incorrect" : exception.getMessage();
         return createError(HttpStatus.BAD_REQUEST, Collections.singletonList(msg));
     }
@@ -47,6 +51,8 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   HttpHeaders headers,
                                                                   HttpStatus status,
                                                                   WebRequest request) {
+        log.info("handleMethodArgumentNotValid, " + ex.getMessage());
+
         List<String> messages = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -62,6 +68,8 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   HttpHeaders headers,
                                                                   HttpStatus status,
                                                                   WebRequest request) {
+        log.info("handleHttpMessageNotReadable, " + ex.getMessage());
+
         String msg;
         if (ex.getCause().getCause() instanceof InvalidDateFormatException) {
             msg = ex.getCause().getCause().getMessage();
