@@ -21,5 +21,7 @@ public class GroupRequestDto {
 
     @NotNull(message = "currency is required")
     private Currency currency;
+
+    @NotNull(message = "members is required")
     private List<Long> members;
 }

@@ -127,6 +127,15 @@ class GroupControllerTest {
     }
 
     @Test
+    void saveGroup_GroupWithoutMembers_ShouldReturnBadRequestAndError() throws Exception {
+        requestDto.setMembers(null);
+
+        postGroupAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
+                400,
+                "members is required");
+    }
+
+    @Test
     void saveGroup_GroupMembersIdsAreInvalid_ShouldReturnBadRequestAndErrorWithMsgFromException() throws Exception {
         Exception error = new GroupMembersIdsValidationException("msg");
 
