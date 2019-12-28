@@ -340,7 +340,7 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setUsername(null);
         String errorMsg = "username is required";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -348,7 +348,7 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setUsername("");
         String errorMsg = "username length should be between 1 and 50";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -356,7 +356,7 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setUsername(RANDOM_51_STRING);
         String errorMsg = "username length should be between 1 and 50";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -364,7 +364,7 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setFirstName(null);
         String errorMsg = "firstName is required";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -372,7 +372,7 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setFirstName("");
         String errorMsg = "firstName length should be between 1 and 50";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -380,7 +380,7 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setFirstName(RANDOM_51_STRING);
         String errorMsg = "firstName length should be between 1 and 50";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -388,7 +388,7 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setLastName(null);
         String errorMsg = "lastName is required";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -396,7 +396,7 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setLastName("");
         String errorMsg = "lastName length should be between 1 and 50";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -404,7 +404,7 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setLastName(RANDOM_51_STRING);
         String errorMsg = "lastName length should be between 1 and 50";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -412,7 +412,7 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setDateOfBirth(null);
         String errorMsg = "dateOfBirth is required";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -421,7 +421,7 @@ public class UserControllerTest {
         JSONObject json = new JSONObject(objectMapper.writeValueAsString(userRequestDto));
         json.put("dateOfBirth", "2019-12-19");
         String errorMsg = "Incorrect date format of dateOfBirth. Valid pattern is dd-MM-yyyy";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, json.toString(), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(json.toString(), errorMsg);
     }
 
     @Test
@@ -429,7 +429,7 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setEmail(null);
         String errorMsg = "email is required";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
     @Test
@@ -438,7 +438,7 @@ public class UserControllerTest {
         JSONObject json = new JSONObject(objectMapper.writeValueAsString(userRequestDto));
         json.put("email", "#fr@gr@.com");
         String errorMsg = "email string has to be a well-formed email address";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, json.toString(), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(json.toString(), errorMsg);
     }
 
     @Test
@@ -446,11 +446,11 @@ public class UserControllerTest {
         Long id = 1L;
         userRequestDto.setReceiveNotifications(null);
         String errorMsg = "receiveNotifications is required";
-        putUserDataAndExpectBadRequestErrorWithSingleMsg(id, objectMapper.writeValueAsString(userRequestDto), errorMsg);
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
-    private void putUserDataAndExpectBadRequestErrorWithSingleMsg(Long id, String content, String errorMsg) throws Exception {
-        String responseBody = mockMvc.perform(put("/users/" + id)
+    private void putUserDataAndExpectBadRequestErrorWithSingleMsg(String content, String errorMsg) throws Exception {
+        String responseBody = mockMvc.perform(put("/users/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content))
                 .andExpect(status().isBadRequest())
@@ -478,19 +478,19 @@ public class UserControllerTest {
     @Test
     public void deleteUser_UserDoesntExist_ReturnNotFoundAndError() throws Exception {
         Long id = 1L;
-        doThrow(ResourceNotFoundException.class).when(service).deleteUserById(id);
+        ResourceNotFoundException ex = new ResourceNotFoundException("msg");
+        doThrow(ex).when(service).deleteUserById(id);
 
         String responseBody = mockMvc.perform(delete("/users/" + id))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
 
-
         ErrorDto error = objectMapper.readValue(responseBody, ErrorDto.class);
 
         assertEquals(error.getStatusCode(), HttpStatus.NOT_FOUND.value());
         assertNotNull(error.getMessages());
-        assertEquals(1, error.getMessages().size());
+        assertEquals(ex.getMessage(), error.getMessages().get(0));
         assertNotNull(error.getTimestamp());
     }
 
