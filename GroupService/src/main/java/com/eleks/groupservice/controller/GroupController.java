@@ -1,11 +1,11 @@
 package com.eleks.groupservice.controller;
 
 import com.eleks.groupservice.dto.GroupRequestDto;
+import com.eleks.groupservice.dto.GroupResponseDto;
+import com.eleks.groupservice.exception.ResourceNotFoundException;
 import com.eleks.groupservice.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -20,7 +20,12 @@ public class GroupController {
     }
 
     @PostMapping("/groups")
-    public GroupRequestDto saveGroup(@Valid @RequestBody GroupRequestDto group) {
+    public GroupResponseDto saveGroup(@Valid @RequestBody GroupRequestDto group) {
         return service.saveGroup(group);
+    }
+
+    @GetMapping("/groups/{id}")
+    public GroupResponseDto getGroup(@PathVariable Long id) {
+        return service.getGroup(id).orElseThrow(() -> new ResourceNotFoundException("group with this id does't exist"));
     }
 }
