@@ -6,6 +6,7 @@ import com.eleks.groupservice.dto.ErrorDto;
 import com.eleks.groupservice.dto.GroupRequestDto;
 import com.eleks.groupservice.dto.GroupResponseDto;
 import com.eleks.groupservice.exception.GroupMembersIdsValidationException;
+import com.eleks.groupservice.exception.ResourceNotFoundException;
 import com.eleks.groupservice.exception.UserServiceException;
 import com.eleks.groupservice.service.GroupService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,9 +25,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
@@ -190,6 +191,124 @@ class GroupControllerTest {
         ErrorDto error = objectMapper.readValue(responseBody, ErrorDto.class);
         assertEquals(error.getStatusCode(), HttpStatus.NOT_FOUND.value());
         assertEquals("group with this id does't exist", error.getMessages().get(0));
+        assertNotNull(error.getTimestamp());
+    }
+
+    @Test
+    void editGroup_GroupExists_ReturnOkAndUpdatedData() throws Exception {
+        when(groupService.editGroup(anyLong(), any(GroupRequestDto.class))).thenReturn(responseDto);
+
+        mockMvc.perform(put("/groups/" + responseDto.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(responseDto)));
+    }
+
+    @Test
+    void editGroup_GroupDoesntExist_ReturnNotFoundAndError() throws Exception {
+        ResourceNotFoundException ex = new ResourceNotFoundException("msg");
+
+        when(groupService.editGroup(anyLong(), any(GroupRequestDto.class))).thenThrow(ex);
+
+        String responseBody = mockMvc.perform(put("/groups/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorDto error = objectMapper.readValue(responseBody, ErrorDto.class);
+
+        assertEquals(error.getStatusCode(), HttpStatus.NOT_FOUND.value());
+        assertNotNull(error.getMessages());
+        assertEquals(ex.getMessage(), error.getMessages().get(0));
+        assertNotNull(error.getTimestamp());
+    }
+
+    @Test
+    void editGroup_GroupWithoutGroupName_ShouldReturnBadRequestAndError() throws Exception {
+        requestDto.setGroupName(null);
+
+        putGroupAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
+                400,
+                "groupName is required");
+    }
+
+    @Test
+    void editGroup_GroupWithBlankGroupName_ShouldReturnBadRequestAndError() throws Exception {
+        requestDto.setGroupName("");
+
+        putGroupAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
+                400,
+                "groupName length should be between 1 and 50");
+    }
+
+
+    @Test
+    void editGroup_GroupWithLongGroupName_ShouldReturnBadRequestAndError() throws Exception {
+        requestDto.setGroupName(RANDOM_51_STRING);
+
+        putGroupAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
+                400,
+                "groupName length should be between 1 and 50");
+    }
+
+    @Test
+    void editGroup_GroupWithoutCurrency_ShouldReturnBadRequestAndError() throws Exception {
+        requestDto.setCurrency(null);
+
+        putGroupAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
+                400,
+                "currency is required");
+    }
+
+    @Test
+    void editGroup_GroupWithoutMembers_ShouldReturnBadRequestAndError() throws Exception {
+        requestDto.setMembers(null);
+
+        putGroupAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
+                400,
+                "members is required");
+    }
+
+    @Test
+    void editGroup_GroupMembersIdsAreInvalid_ShouldReturnBadRequestAndErrorWithMsgFromException() throws Exception {
+        Exception error = new GroupMembersIdsValidationException("msg");
+
+        when(groupService.saveGroup(any(GroupRequestDto.class))).thenThrow(error);
+
+        putGroupAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
+                400,
+                error.getMessage());
+    }
+
+    @Test
+    void editGroup_UserServiceError_ShouldReturnServerErrorAndErrorWithMsgFromException() throws Exception {
+        Exception error = new UserServiceException("msg");
+
+        when(groupService.saveGroup(any(GroupRequestDto.class))).thenThrow(error);
+
+        putGroupAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
+                500,
+                error.getMessage());
+    }
+
+    private void putGroupAndExpectStatusAndErrorWithMessage(String content, int expectedStatus, String expectedMsg) throws Exception {
+        String errorJson = mockMvc.perform(put("/groups/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content))
+                .andExpect(status().is(expectedStatus))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorDto error = objectMapper.readValue(errorJson, ErrorDto.class);
+
+        assertEquals(error.getStatusCode(), expectedStatus);
+        assertNotNull(error.getMessages());
+        assertEquals(1, error.getMessages().size());
+        assertEquals(expectedMsg, error.getMessages().get(0));
         assertNotNull(error.getTimestamp());
     }
 

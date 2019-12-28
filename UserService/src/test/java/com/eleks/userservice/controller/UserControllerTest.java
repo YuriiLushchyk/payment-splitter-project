@@ -322,7 +322,7 @@ public class UserControllerTest {
 
         String responseBody = mockMvc.perform(put("/users/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userResponseDto)))
+                .content(objectMapper.writeValueAsString(userRequestDto)))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
