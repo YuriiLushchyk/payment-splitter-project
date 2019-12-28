@@ -33,4 +33,9 @@ public class GroupController {
     public GroupResponseDto editGroup(@PathVariable Long id, @Valid @RequestBody GroupRequestDto group) {
         return service.editGroup(id, group);
     }
+
+    @DeleteMapping("/groups/{id}")
+    public void deleteGroup(@PathVariable Long id) {
+        service.deleteGroupById(id);
+    }
 }
