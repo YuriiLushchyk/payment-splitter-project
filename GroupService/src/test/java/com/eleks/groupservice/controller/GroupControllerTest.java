@@ -14,15 +14,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -160,6 +163,33 @@ class GroupControllerTest {
         assertNotNull(error.getMessages());
         assertEquals(1, error.getMessages().size());
         assertEquals(expectedMsg, error.getMessages().get(0));
+        assertNotNull(error.getTimestamp());
+    }
+
+    @Test
+    void getGroup_GettingExistingGroup_ReturnOkAndGroupData() throws Exception {
+        when(groupService.getGroup(responseDto.getId())).thenReturn(Optional.of(responseDto));
+
+        mockMvc.perform(get("/groups/" + responseDto.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(responseDto)));
+    }
+
+    @Test
+    void getGroup_GroupDoesntExist_ReturnNotFoundAndError() throws Exception {
+        Long id = 1L;
+        when(groupService.getGroup(id)).thenReturn(Optional.empty());
+
+        String responseBody = mockMvc.perform(get("/groups/" + id))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse().getContentAsString();
+
+        ErrorDto error = objectMapper.readValue(responseBody, ErrorDto.class);
+        assertEquals(error.getStatusCode(), HttpStatus.NOT_FOUND.value());
+        assertEquals("group with this id does't exist", error.getMessages().get(0));
         assertNotNull(error.getTimestamp());
     }
 

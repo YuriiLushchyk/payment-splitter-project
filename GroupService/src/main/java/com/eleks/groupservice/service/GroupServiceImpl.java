@@ -10,6 +10,8 @@ import com.eleks.groupservice.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class GroupServiceImpl implements GroupService {
 
@@ -30,5 +32,10 @@ public class GroupServiceImpl implements GroupService {
         Group entity = GroupMapper.toEntity(group);
         Group savedEntity = repository.save(entity);
         return GroupMapper.toDto(savedEntity);
+    }
+
+    @Override
+    public Optional<GroupResponseDto> getGroup(Long id) {
+        return Optional.empty();
     }
 }
