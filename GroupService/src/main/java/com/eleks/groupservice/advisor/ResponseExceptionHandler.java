@@ -1,7 +1,6 @@
 package com.eleks.groupservice.advisor;
 
 import com.eleks.groupservice.dto.ErrorDto;
-import com.eleks.groupservice.exception.EnumValidationException;
 import com.eleks.groupservice.exception.GroupMembersIdsValidationException;
 import com.eleks.groupservice.exception.UserServiceException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
@@ -61,9 +60,7 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   HttpStatus status,
                                                                   WebRequest request) {
         String msg;
-        if (ex.getCause().getCause() instanceof EnumValidationException) {
-            msg = ex.getCause().getCause().getMessage();
-        } else if (ex.getCause() instanceof InvalidFormatException) {
+        if (ex.getCause() instanceof InvalidFormatException) {
             msg = ex.getCause().getMessage();
         } else {
             msg = ex.getMessage();

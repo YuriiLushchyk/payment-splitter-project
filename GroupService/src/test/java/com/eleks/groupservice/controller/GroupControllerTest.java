@@ -9,7 +9,6 @@ import com.eleks.groupservice.exception.GroupMembersIdsValidationException;
 import com.eleks.groupservice.exception.UserServiceException;
 import com.eleks.groupservice.service.GroupService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,16 +113,6 @@ class GroupControllerTest {
         postGroupAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
                 400,
                 "currency is required");
-    }
-
-    @Test
-    void saveGroup_GroupWithWrongCurrency_ShouldReturnBadRequestAndError() throws Exception {
-        JSONObject json = new JSONObject(objectMapper.writeValueAsString(requestDto));
-        json.put("currency", "TRY");
-
-        postGroupAndExpectStatusAndErrorWithMessage(json.toString(),
-                400,
-                "Invalid currency value. Should be one of following : UAH, USD, EUR");
     }
 
     @Test
