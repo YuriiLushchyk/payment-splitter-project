@@ -277,7 +277,7 @@ class GroupControllerTest {
     void editGroup_GroupMembersIdsAreInvalid_ShouldReturnBadRequestAndErrorWithMsgFromException() throws Exception {
         Exception error = new GroupMembersIdsValidationException("msg");
 
-        when(groupService.saveGroup(any(GroupRequestDto.class))).thenThrow(error);
+        when(groupService.editGroup(anyLong(), any(GroupRequestDto.class))).thenThrow(error);
 
         putGroupAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
                 400,
@@ -288,7 +288,7 @@ class GroupControllerTest {
     void editGroup_UserServiceError_ShouldReturnServerErrorAndErrorWithMsgFromException() throws Exception {
         Exception error = new UserServiceException("msg");
 
-        when(groupService.saveGroup(any(GroupRequestDto.class))).thenThrow(error);
+        when(groupService.editGroup(anyLong(), any(GroupRequestDto.class))).thenThrow(error);
 
         putGroupAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
                 500,

@@ -26,7 +26,7 @@ public class UserClient {
         this.restTemplate = restTemplate;
     }
 
-    public boolean areUserIdsValid(List<Long> userIds) {
+    public boolean areUserIdsValid(List<Long> userIds) throws UserServiceException {
         try {
             return validateOnUserService(userIds);
         } catch (HttpClientErrorException ex) {

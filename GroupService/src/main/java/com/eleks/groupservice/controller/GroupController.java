@@ -28,4 +28,9 @@ public class GroupController {
     public GroupResponseDto getGroup(@PathVariable Long id) {
         return service.getGroup(id).orElseThrow(() -> new ResourceNotFoundException("group with this id does't exist"));
     }
+
+    @PutMapping("/groups/{id}")
+    public GroupResponseDto editGroup(@PathVariable Long id, @Valid @RequestBody GroupRequestDto group) {
+        return service.editGroup(id, group);
+    }
 }
