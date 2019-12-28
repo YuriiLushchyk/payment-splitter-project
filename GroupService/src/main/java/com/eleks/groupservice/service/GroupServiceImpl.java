@@ -5,6 +5,7 @@ import com.eleks.groupservice.domain.Group;
 import com.eleks.groupservice.dto.GroupRequestDto;
 import com.eleks.groupservice.dto.GroupResponseDto;
 import com.eleks.groupservice.exception.GroupMembersIdsValidationException;
+import com.eleks.groupservice.exception.ResourceNotFoundException;
 import com.eleks.groupservice.mapper.GroupMapper;
 import com.eleks.groupservice.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,5 +43,10 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public GroupResponseDto editGroup(Long id, GroupRequestDto requestDto) {
         return null;
+    }
+
+    @Override
+    public void deleteGroupById(Long id) throws ResourceNotFoundException {
+
     }
 }

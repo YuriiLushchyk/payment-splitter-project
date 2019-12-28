@@ -24,9 +24,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -309,6 +308,35 @@ class GroupControllerTest {
         assertNotNull(error.getMessages());
         assertEquals(1, error.getMessages().size());
         assertEquals(expectedMsg, error.getMessages().get(0));
+        assertNotNull(error.getTimestamp());
+    }
+
+    @Test
+    public void deleteGroup_GroupExists_ReturnOk() throws Exception {
+        Long id = 1L;
+        mockMvc.perform(delete("/groups/" + id))
+                .andExpect(status().isOk());
+
+        verify(groupService).deleteGroupById(eq(id));
+    }
+
+    @Test
+    public void deleteGroup_GroupDoesntExist_ReturnNotFoundAndError() throws Exception {
+        Long id = 1L;
+        ResourceNotFoundException ex = new ResourceNotFoundException("msg");
+        doThrow(ex).when(groupService).deleteGroupById(id);
+
+        String responseBody = mockMvc.perform(delete("/groups/" + id))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
+
+        ErrorDto error = objectMapper.readValue(responseBody, ErrorDto.class);
+
+        assertEquals(error.getStatusCode(), HttpStatus.NOT_FOUND.value());
+        assertNotNull(error.getMessages());
+        assertEquals(ex.getMessage(), error.getMessages().get(0));
         assertNotNull(error.getTimestamp());
     }
 

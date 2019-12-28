@@ -13,4 +13,6 @@ public interface GroupService {
     Optional<GroupResponseDto> getGroup(Long id);
 
     GroupResponseDto editGroup(Long id, GroupRequestDto requestDto) throws ResourceNotFoundException, GroupMembersIdsValidationException;
+
+    void deleteGroupById(Long id) throws ResourceNotFoundException;
 }
