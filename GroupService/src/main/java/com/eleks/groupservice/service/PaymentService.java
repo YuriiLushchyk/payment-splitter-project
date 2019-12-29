@@ -2,6 +2,7 @@ package com.eleks.groupservice.service;
 
 import com.eleks.groupservice.dto.payment.PaymentRequestDto;
 import com.eleks.groupservice.dto.payment.PaymentResponseDto;
+import com.eleks.groupservice.exception.ResourceNotFoundException;
 import com.eleks.groupservice.exception.UsersIdsValidationException;
 
 import java.util.List;
@@ -14,5 +15,5 @@ public interface PaymentService {
 
     Optional<List<PaymentResponseDto>> getPayments(Long groupId);
 
-    void deletePayment(Long groupId, Long paymentId);
+    void deletePayment(Long groupId, Long paymentId) throws ResourceNotFoundException;
 }
