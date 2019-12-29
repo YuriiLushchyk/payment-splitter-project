@@ -1,7 +1,7 @@
 package com.eleks.groupservice.client;
 
-import com.eleks.groupservice.dto.UserDto;
-import com.eleks.groupservice.dto.UserSearchDto;
+import com.eleks.groupservice.dto.userclient.UserDto;
+import com.eleks.groupservice.dto.userclient.UserSearchDto;
 import com.eleks.groupservice.exception.UserServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

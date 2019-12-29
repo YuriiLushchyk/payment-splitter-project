@@ -1,7 +1,7 @@
 package com.eleks.groupservice.controller;
 
-import com.eleks.groupservice.dto.GroupRequestDto;
-import com.eleks.groupservice.dto.GroupResponseDto;
+import com.eleks.groupservice.dto.group.GroupRequestDto;
+import com.eleks.groupservice.dto.group.GroupResponseDto;
 import com.eleks.groupservice.exception.ResourceNotFoundException;
 import com.eleks.groupservice.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;

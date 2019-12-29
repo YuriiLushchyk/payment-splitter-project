@@ -3,11 +3,11 @@ package com.eleks.groupservice.controller;
 import com.eleks.groupservice.advisor.ResponseExceptionHandler;
 import com.eleks.groupservice.domain.Currency;
 import com.eleks.groupservice.dto.ErrorDto;
-import com.eleks.groupservice.dto.GroupRequestDto;
-import com.eleks.groupservice.dto.GroupResponseDto;
-import com.eleks.groupservice.exception.GroupMembersIdsValidationException;
+import com.eleks.groupservice.dto.group.GroupRequestDto;
+import com.eleks.groupservice.dto.group.GroupResponseDto;
 import com.eleks.groupservice.exception.ResourceNotFoundException;
 import com.eleks.groupservice.exception.UserServiceException;
+import com.eleks.groupservice.exception.UsersIdsValidationException;
 import com.eleks.groupservice.service.GroupService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
-@WebMvcTest
+@WebMvcTest(GroupController.class)
 class GroupControllerTest {
 
     private MockMvc mockMvc;
@@ -129,7 +129,7 @@ class GroupControllerTest {
 
     @Test
     void saveGroup_GroupMembersIdsAreInvalid_ShouldReturnBadRequestAndErrorWithMsgFromException() throws Exception {
-        Exception error = new GroupMembersIdsValidationException("msg");
+        Exception error = new UsersIdsValidationException("msg");
 
         when(groupService.saveGroup(any(GroupRequestDto.class))).thenThrow(error);
 
@@ -274,7 +274,7 @@ class GroupControllerTest {
 
     @Test
     void editGroup_GroupMembersIdsAreInvalid_ShouldReturnBadRequestAndErrorWithMsgFromException() throws Exception {
-        Exception error = new GroupMembersIdsValidationException("msg");
+        Exception error = new UsersIdsValidationException("msg");
 
         when(groupService.editGroup(anyLong(), any(GroupRequestDto.class))).thenThrow(error);
 

@@ -1,4 +1,4 @@
-package com.eleks.groupservice.dto;
+package com.eleks.groupservice.dto.group;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

@@ -2,9 +2,9 @@ package com.eleks.groupservice.service;
 
 import com.eleks.groupservice.client.UserClient;
 import com.eleks.groupservice.domain.Group;
-import com.eleks.groupservice.dto.GroupRequestDto;
-import com.eleks.groupservice.dto.GroupResponseDto;
-import com.eleks.groupservice.exception.GroupMembersIdsValidationException;
+import com.eleks.groupservice.dto.group.GroupRequestDto;
+import com.eleks.groupservice.dto.group.GroupResponseDto;
+import com.eleks.groupservice.exception.UsersIdsValidationException;
 import com.eleks.groupservice.exception.ResourceNotFoundException;
 import com.eleks.groupservice.mapper.GroupMapper;
 import com.eleks.groupservice.repository.GroupRepository;
@@ -28,7 +28,7 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public GroupResponseDto saveGroup(GroupRequestDto group) {
         if (!client.areUserIdsValid(group.getMembers())) {
-            throw new GroupMembersIdsValidationException("Group contains non existing user's ids");
+            throw new UsersIdsValidationException("Group contains non existing user's ids");
         }
         Group entity = GroupMapper.toEntity(group);
         Group savedEntity = repository.save(entity);

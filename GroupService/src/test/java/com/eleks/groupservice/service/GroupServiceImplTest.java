@@ -3,9 +3,9 @@ package com.eleks.groupservice.service;
 import com.eleks.groupservice.client.UserClient;
 import com.eleks.groupservice.domain.Currency;
 import com.eleks.groupservice.domain.Group;
-import com.eleks.groupservice.dto.GroupRequestDto;
-import com.eleks.groupservice.dto.GroupResponseDto;
-import com.eleks.groupservice.exception.GroupMembersIdsValidationException;
+import com.eleks.groupservice.dto.group.GroupRequestDto;
+import com.eleks.groupservice.dto.group.GroupResponseDto;
+import com.eleks.groupservice.exception.UsersIdsValidationException;
 import com.eleks.groupservice.repository.GroupRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,7 +66,7 @@ class GroupServiceImplTest {
     void saveGroup_GroupMembersAreNotExist_ShouldThrowException() {
         when(client.areUserIdsValid(requestDto.getMembers())).thenReturn(false);
 
-        GroupMembersIdsValidationException exception = assertThrows(GroupMembersIdsValidationException.class,
+        UsersIdsValidationException exception = assertThrows(UsersIdsValidationException.class,
                 () -> service.saveGroup(requestDto));
 
         assertEquals("Group contains non existing user's ids", exception.getMessage());

@@ -1,7 +1,7 @@
 package com.eleks.groupservice.advisor;
 
 import com.eleks.groupservice.dto.ErrorDto;
-import com.eleks.groupservice.exception.GroupMembersIdsValidationException;
+import com.eleks.groupservice.exception.UsersIdsValidationException;
 import com.eleks.groupservice.exception.ResourceNotFoundException;
 import com.eleks.groupservice.exception.UserServiceException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
@@ -33,10 +33,10 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         return createError(HttpStatus.INTERNAL_SERVER_ERROR, Collections.singletonList(exception.getMessage()));
     }
 
-    @ExceptionHandler(GroupMembersIdsValidationException.class)
+    @ExceptionHandler(UsersIdsValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ErrorDto handleInvalidGroupMembersIdsException(GroupMembersIdsValidationException exception) {
+    public ErrorDto handleInvalidGroupMembersIdsException(UsersIdsValidationException exception) {
         return createError(HttpStatus.BAD_REQUEST, Collections.singletonList(exception.getMessage()));
     }
 

@@ -1,4 +1,4 @@
-package com.eleks.groupservice.dto;
+package com.eleks.groupservice.dto.userclient;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

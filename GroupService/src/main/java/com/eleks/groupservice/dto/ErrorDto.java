@@ -16,6 +16,6 @@ import java.util.List;
 public class ErrorDto {
     private int statusCode;
     private List<String> messages;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss dd-MM-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss'T'dd-MM-yyyy")
     private LocalDateTime timestamp;
 }

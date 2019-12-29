@@ -1,8 +1,8 @@
 package com.eleks.groupservice.mapper;
 
 import com.eleks.groupservice.domain.Group;
-import com.eleks.groupservice.dto.GroupRequestDto;
-import com.eleks.groupservice.dto.GroupResponseDto;
+import com.eleks.groupservice.dto.group.GroupRequestDto;
+import com.eleks.groupservice.dto.group.GroupResponseDto;
 
 import java.util.Objects;
 

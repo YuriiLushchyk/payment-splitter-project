@@ -1,6 +1,6 @@
 package com.eleks.groupservice.client;
 
-import com.eleks.groupservice.dto.UserSearchDto;
+import com.eleks.groupservice.dto.userclient.UserSearchDto;
 import com.eleks.groupservice.exception.UserServiceException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;

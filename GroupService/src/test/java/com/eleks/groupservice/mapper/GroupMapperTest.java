@@ -2,8 +2,8 @@ package com.eleks.groupservice.mapper;
 
 import com.eleks.groupservice.domain.Currency;
 import com.eleks.groupservice.domain.Group;
-import com.eleks.groupservice.dto.GroupRequestDto;
-import com.eleks.groupservice.dto.GroupResponseDto;
+import com.eleks.groupservice.dto.group.GroupRequestDto;
+import com.eleks.groupservice.dto.group.GroupResponseDto;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

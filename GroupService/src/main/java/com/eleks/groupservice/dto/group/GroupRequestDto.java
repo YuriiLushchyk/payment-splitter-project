@@ -1,4 +1,4 @@
-package com.eleks.groupservice.dto;
+package com.eleks.groupservice.dto.group;
 
 import com.eleks.groupservice.domain.Currency;
 import lombok.AllArgsConstructor;
