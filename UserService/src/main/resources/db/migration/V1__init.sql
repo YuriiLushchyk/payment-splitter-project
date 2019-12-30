@@ -7,3 +7,6 @@ CREATE TABLE user(
   date_of_birth DATE NOT NULL,
   receive_notifications BOOLEAN NOT NULL
 );
+
+INSERT INTO user(id, username, first_name, last_name, email, date_of_birth, receive_notifications)
+VALUES (1, 'testUser', 'Test', 'User', 'test.user@eleks.com', '2008-7-04', TRUE);
