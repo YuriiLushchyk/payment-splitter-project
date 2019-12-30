@@ -122,6 +122,24 @@ class PaymentControllerTest {
     }
 
     @Test
+    void createPayment_PaymentWithNegativePrice_ShouldReturnBadRequestAndError() throws Exception {
+        requestDto.setPrice(-10D);
+
+        postPaymentAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
+                400,
+                "price can't be negative or zero");
+    }
+
+    @Test
+    void createPayment_PaymentWithZeroPrice_ShouldReturnBadRequestAndError() throws Exception {
+        requestDto.setPrice(0D);
+
+        postPaymentAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
+                400,
+                "price can't be negative or zero");
+    }
+
+    @Test
     void createPayment_PaymentWithoutCoPayers_ShouldReturnBadRequestAndError() throws Exception {
         requestDto.setCoPayers(null);
 
