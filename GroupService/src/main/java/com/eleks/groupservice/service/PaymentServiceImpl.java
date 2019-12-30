@@ -73,6 +73,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public void deletePayment(Long groupId, Long paymentId) throws ResourceNotFoundException {
 
     }

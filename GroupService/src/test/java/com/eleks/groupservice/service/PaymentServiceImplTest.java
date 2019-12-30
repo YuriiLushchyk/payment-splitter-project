@@ -24,6 +24,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -173,6 +174,39 @@ class PaymentServiceImplTest {
         Optional<List<PaymentResponseDto>> result = service.getPayments(group.getId());
 
         assertFalse(result.isPresent());
+    }
+
+    @Test
+    void deletePayment_GroupAndPaymentExist_ShouldCallDelete() {
+        payment.setGroup(group);
+
+        when(paymentRepo.findById(payment.getId())).thenReturn(Optional.of(payment));
+
+        service.deletePayment(group.getId(), payment.getId());
+
+        verify(paymentRepo).deleteById(payment.getId());
+    }
+
+    @Test
+    void deletePayment_PaymentDoesntExist_ShouldThrowResourceNotFoundException() {
+        when(paymentRepo.findById(payment.getId())).thenReturn(Optional.empty());
+
+        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
+                () -> service.deletePayment(group.getId(), payment.getId()));
+
+        assertEquals("Payment doesn't exists", ex.getMessage());
+    }
+
+    @Test
+    void deletePayment_PaymentExistButItBelongsToAnotherGroup_ShouldThrowResourceNotFoundException() {
+        payment.setGroup(group);
+
+        when(paymentRepo.findById(payment.getId())).thenReturn(Optional.of(payment));
+
+        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
+                () -> service.deletePayment(222L, payment.getId()));
+
+        assertEquals("Payment doesn't exists", ex.getMessage());
     }
 
 }
