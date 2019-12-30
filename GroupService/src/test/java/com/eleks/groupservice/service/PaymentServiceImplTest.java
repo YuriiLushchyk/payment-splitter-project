@@ -17,9 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -137,6 +135,39 @@ class PaymentServiceImplTest {
         when(groupRepo.findById(group.getId())).thenReturn(Optional.of(group));
 
         Optional<PaymentResponseDto> result = service.getPayment(group.getId(), payment.getId());
+
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    void getPayments_GroupExistAndHasPayments_ReturnListOfPayments() {
+        group.getPayments().add(payment);
+
+        when(groupRepo.findById(group.getId())).thenReturn(Optional.of(group));
+
+        Optional<List<PaymentResponseDto>> result = service.getPayments(group.getId());
+
+        assertTrue(result.isPresent());
+        assertTrue(group.getPayments().containsAll(result.get()));
+    }
+
+    @Test
+    void getPayments_GroupExistButWithoutPayments_ReturnEmptyList() {
+        group.setPayments(new HashSet<>());
+
+        when(groupRepo.findById(group.getId())).thenReturn(Optional.of(group));
+
+        Optional<List<PaymentResponseDto>> result = service.getPayments(group.getId());
+
+        assertTrue(result.isPresent());
+        assertTrue(result.get().isEmpty());
+    }
+
+    @Test
+    void getPayments_GroupDoesntExist_ReturnEmptyOptional() {
+        when(groupRepo.findById(group.getId())).thenReturn(Optional.empty());
+
+        Optional<List<PaymentResponseDto>> result = service.getPayments(group.getId());
 
         assertFalse(result.isPresent());
     }
