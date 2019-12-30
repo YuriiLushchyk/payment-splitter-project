@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -58,7 +59,17 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Optional<List<PaymentResponseDto>> getPayments(Long groupId) {
-        return Optional.empty();
+        Optional<Group> groupResult = groupRepo.findById(groupId);
+        if (groupResult.isPresent()) {
+            List<PaymentResponseDto> result = groupResult.get()
+                    .getPayments()
+                    .stream()
+                    .map(PaymentMapper::toDto)
+                    .collect(Collectors.toList());
+            return Optional.of(result);
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override

@@ -17,7 +17,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -130,7 +133,7 @@ class PaymentServiceImplTest {
 
     @Test
     void getPayment_GroupExistsButPaymentIsNot_ShouldReturnEmptyOptional() {
-        group.setPayments(Collections.emptySet());
+        group.setPayments(Collections.emptyList());
 
         when(groupRepo.findById(group.getId())).thenReturn(Optional.of(group));
 
@@ -148,12 +151,12 @@ class PaymentServiceImplTest {
         Optional<List<PaymentResponseDto>> result = service.getPayments(group.getId());
 
         assertTrue(result.isPresent());
-        assertTrue(group.getPayments().containsAll(result.get()));
+        assertEquals(group.getPayments().get(0).getId(), result.get().get(0).getId());
     }
 
     @Test
     void getPayments_GroupExistButWithoutPayments_ReturnEmptyList() {
-        group.setPayments(new HashSet<>());
+        group.setPayments(Collections.emptyList());
 
         when(groupRepo.findById(group.getId())).thenReturn(Optional.of(group));
 
