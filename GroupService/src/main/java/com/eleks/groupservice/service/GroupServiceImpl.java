@@ -26,7 +26,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public GroupResponseDto saveGroup(GroupRequestDto group) {
+    public GroupResponseDto saveGroup(GroupRequestDto group) throws UsersIdsValidationException {
         if (!client.areUserIdsValid(group.getMembers())) {
             throw new UsersIdsValidationException("Group contains non existing users");
         }
@@ -37,16 +37,29 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public Optional<GroupResponseDto> getGroup(Long id) {
-        return Optional.empty();
+        return repository.findById(id).map(GroupMapper::toDto);
     }
 
     @Override
-    public GroupResponseDto editGroup(Long id, GroupRequestDto requestDto) {
-        return null;
+    public GroupResponseDto editGroup(Long id, GroupRequestDto requestDto) throws ResourceNotFoundException, UsersIdsValidationException {
+        if (!repository.findById(id).isPresent()) {
+            throw new ResourceNotFoundException("Group does't exist");
+        }
+        if (!client.areUserIdsValid(requestDto.getMembers())) {
+            throw new UsersIdsValidationException("Group contains non existing users");
+        }
+
+        Group group = GroupMapper.toEntity(requestDto);
+        group.setId(id);
+        return GroupMapper.toDto(repository.save(group));
     }
 
     @Override
     public void deleteGroupById(Long id) throws ResourceNotFoundException {
-
+        if (repository.findById(id).isPresent()) {
+            repository.deleteById(id);
+        } else {
+            throw new ResourceNotFoundException("Group does't exist");
+        }
     }
 }

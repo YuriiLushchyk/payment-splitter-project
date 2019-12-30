@@ -103,6 +103,7 @@ class GroupServiceImplTest {
         GroupResponseDto result = service.editGroup(entity.getId(), requestDto);
 
         assertNotNull(result);
+        assertEquals(entity.getId(), result.getId());
     }
 
     @Test
@@ -116,7 +117,6 @@ class GroupServiceImplTest {
 
     @Test
     void editGroup_GroupExistMembersAreNotValid_ThrowUsersIdsValidationException() {
-        when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
         when(client.areUserIdsValid(requestDto.getMembers())).thenReturn(false);
 
         UsersIdsValidationException exception = assertThrows(UsersIdsValidationException.class,
@@ -124,7 +124,6 @@ class GroupServiceImplTest {
 
         assertEquals("Group contains non existing users", exception.getMessage());
     }
-
 
     @Test
     public void deleteGroupById_GroupWithIdExists_CallRepositoryDelete() {
