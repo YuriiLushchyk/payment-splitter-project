@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PaymentService {
-    PaymentResponseDto createPayment(Long groupId, Long creatorId, PaymentRequestDto requestDto) throws UsersIdsValidationException;
+    PaymentResponseDto createPayment(Long groupId, Long creatorId, PaymentRequestDto requestDto) throws ResourceNotFoundException, UsersIdsValidationException;
 
     Optional<PaymentResponseDto> getPayment(Long groupId, Long creatorId, Long paymentId);
 

@@ -131,13 +131,24 @@ class PaymentControllerTest {
     }
 
     @Test
-    void createPayment_CoPayersIdsAreInvalid_ShouldReturnBadRequestAndErrorWithMsgFromException() throws Exception {
-        Exception error = new UsersIdsValidationException("msg");
+    void createPayment_CoPayersIdsAreInvalid_ShouldReturnBadRequestAndErrorWithMsgFromUsersIdsValidationException() throws Exception {
+        UsersIdsValidationException error = new UsersIdsValidationException("msg");
 
         when(service.createPayment(anyLong(), anyLong(), any(PaymentRequestDto.class))).thenThrow(error);
 
         postPaymentAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
                 400,
+                error.getMessage());
+    }
+
+    @Test
+    void createPayment_GroupDoesntExist_ShouldReturnNotFoundAndErrorWithMsgFromResourceNotFoundException() throws Exception {
+        ResourceNotFoundException error = new ResourceNotFoundException("msg");
+
+        when(service.createPayment(anyLong(), anyLong(), any(PaymentRequestDto.class))).thenThrow(error);
+
+        postPaymentAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
+                404,
                 error.getMessage());
     }
 

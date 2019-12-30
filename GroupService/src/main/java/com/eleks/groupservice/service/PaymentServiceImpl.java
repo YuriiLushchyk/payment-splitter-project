@@ -2,6 +2,8 @@ package com.eleks.groupservice.service;
 
 import com.eleks.groupservice.dto.payment.PaymentRequestDto;
 import com.eleks.groupservice.dto.payment.PaymentResponseDto;
+import com.eleks.groupservice.exception.ResourceNotFoundException;
+import com.eleks.groupservice.exception.UsersIdsValidationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -9,8 +11,9 @@ import java.util.Optional;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
+
     @Override
-    public PaymentResponseDto createPayment(Long groupId, Long creatorId, PaymentRequestDto requestDto) {
+    public PaymentResponseDto createPayment(Long groupId, Long creatorId, PaymentRequestDto requestDto) throws ResourceNotFoundException, UsersIdsValidationException {
         return null;
     }
 
@@ -25,7 +28,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public void deletePayment(Long groupId, Long paymentId) {
+    public void deletePayment(Long groupId, Long paymentId) throws ResourceNotFoundException {
 
     }
 }
