@@ -29,7 +29,8 @@ public class Group {
 
     @Column(name = "members")
     @Convert(converter = LongListToStringConverter.class)
-    private List<Long> members;
+    @Builder.Default
+    private List<Long> members = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "group", fetch = FetchType.EAGER)
     @Builder.Default

@@ -103,7 +103,7 @@ class UserRepositoryTest {
 
     @Test
     void findAllByIdIn_NoUsersAndFindByIds_ReturnTwoUsers() {
-        Optional<List<User>> found = repository.findAllByIdIn(Arrays.asList(1L, 2L));
+        Optional<List<User>> found = repository.findAllByIdIn(Arrays.asList(33L, 44L));
 
         assertFalse(found.isPresent());
     }

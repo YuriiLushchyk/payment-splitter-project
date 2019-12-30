@@ -7,8 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class LongListToStringConverterTest {
 
@@ -51,14 +50,14 @@ class LongListToStringConverterTest {
     }
 
     @Test
-    void convertToEntityAttribute_GivenEmptyString_ReturnNull() {
+    void convertToEntityAttribute_GivenEmptyString_ReturnEmptyList() {
         List<Long> digits = converter.convertToEntityAttribute("");
-        assertNull(digits);
+        assertTrue(digits.isEmpty());
     }
 
     @Test
-    void convertToEntityAttribute_GivenNull_ReturnNull() {
+    void convertToEntityAttribute_GivenNull_ReturnEmptyList() {
         List<Long> digits = converter.convertToEntityAttribute(null);
-        assertNull(digits);
+        assertTrue(digits.isEmpty());
     }
 }

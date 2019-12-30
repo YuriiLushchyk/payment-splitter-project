@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +23,7 @@ public class LongListToStringConverter implements AttributeConverter<List<Long>,
 
     @Override
     public List<Long> convertToEntityAttribute(String dbData) {
-        if (dbData == null || dbData.isEmpty()) return null;
+        if (dbData == null || dbData.isEmpty()) return Collections.emptyList();
         try {
             return Arrays.stream(dbData.split(SPLIT_CHAR)).map(Long::valueOf).collect(Collectors.toList());
         } catch (NumberFormatException ex) {

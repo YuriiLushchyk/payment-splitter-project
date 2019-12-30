@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -29,7 +30,8 @@ public class Payment {
 
     @Column(name = "co_payers")
     @Convert(converter = LongListToStringConverter.class)
-    private List<Long> coPayers;
+    @Builder.Default
+    private List<Long> coPayers = new ArrayList<>();
 
     @Column(name = "creator_id")
     private Long creatorId;

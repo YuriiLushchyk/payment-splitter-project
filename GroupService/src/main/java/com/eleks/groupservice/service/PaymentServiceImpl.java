@@ -10,7 +10,6 @@ import com.eleks.groupservice.mapper.PaymentMapper;
 import com.eleks.groupservice.repository.GroupRepository;
 import com.eleks.groupservice.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +27,6 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    @Transactional
     public PaymentResponseDto createPayment(Long groupId, Long creatorId, PaymentRequestDto requestDto) throws ResourceNotFoundException, UsersIdsValidationException {
         Group group = groupRepo.findById(groupId).orElseThrow(() -> new ResourceNotFoundException("Group doesn't exist"));
 
@@ -73,7 +71,6 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    @Transactional
     public void deletePayment(Long groupId, Long paymentId) throws ResourceNotFoundException {
         Optional<Payment> foundPayment = paymentRepo.findById(paymentId);
         if (foundPayment.isPresent() && foundPayment.get().getGroup().getId().equals(groupId)) {
