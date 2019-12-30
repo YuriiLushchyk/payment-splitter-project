@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface PaymentService {
     PaymentResponseDto createPayment(Long groupId, Long creatorId, PaymentRequestDto requestDto) throws ResourceNotFoundException, UsersIdsValidationException;
 
-    Optional<PaymentResponseDto> getPayment(Long groupId, Long creatorId, Long paymentId);
+    Optional<PaymentResponseDto> getPayment(Long groupId, Long paymentId);
 
     Optional<List<PaymentResponseDto>> getPayments(Long groupId);
 

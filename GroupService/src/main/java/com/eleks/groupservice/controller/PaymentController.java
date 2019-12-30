@@ -28,7 +28,7 @@ public class PaymentController {
 
     @GetMapping("/groups/{groupId}/payments/{paymentId}")
     public PaymentResponseDto getPayment(@PathVariable Long groupId, @PathVariable Long paymentId) {
-        return service.getPayment(groupId, TEST_USER_ID, paymentId)
+        return service.getPayment(groupId, paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("payment does't exist"));
     }
 

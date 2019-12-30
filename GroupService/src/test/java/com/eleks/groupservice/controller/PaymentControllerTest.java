@@ -171,7 +171,7 @@ class PaymentControllerTest {
 
     @Test
     void getPayment_GettingExistingPayment_ReturnOkAndPaymentData() throws Exception {
-        when(service.getPayment(anyLong(), anyLong(), anyLong())).thenReturn(Optional.of(responseDto));
+        when(service.getPayment(anyLong(), anyLong())).thenReturn(Optional.of(responseDto));
 
         mockMvc.perform(get("/groups/1/payments/" + responseDto.getId()))
                 .andExpect(status().isOk())
@@ -181,7 +181,7 @@ class PaymentControllerTest {
 
     @Test
     void getPayment_PaymentDoesntExist_ReturnNotFoundAndError() throws Exception {
-        when(service.getPayment(anyLong(), anyLong(), anyLong())).thenReturn(Optional.empty());
+        when(service.getPayment(anyLong(), anyLong())).thenReturn(Optional.empty());
 
         String responseBody = mockMvc.perform(get("/groups/1/payments/" + responseDto.getId()))
                 .andExpect(status().isNotFound())
