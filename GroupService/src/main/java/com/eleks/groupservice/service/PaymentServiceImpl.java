@@ -75,6 +75,11 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public void deletePayment(Long groupId, Long paymentId) throws ResourceNotFoundException {
-
+        Optional<Payment> foundPayment = paymentRepo.findById(paymentId);
+        if (foundPayment.isPresent() && foundPayment.get().getGroup().getId().equals(groupId)) {
+            paymentRepo.deleteById(foundPayment.get().getId());
+        } else {
+            throw new ResourceNotFoundException("Payment doesn't exists");
+        }
     }
 }
