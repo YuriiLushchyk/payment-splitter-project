@@ -1,5 +1,6 @@
 package com.eleks.groupservice.mapper;
 
+import com.eleks.groupservice.domain.Group;
 import com.eleks.groupservice.domain.Payment;
 import com.eleks.groupservice.dto.payment.PaymentRequestDto;
 import com.eleks.groupservice.dto.payment.PaymentResponseDto;
@@ -8,7 +9,7 @@ import java.util.Objects;
 
 public class PaymentMapper {
 
-    public static Payment toEntity(Long groupId, Long creatorId, PaymentRequestDto dto) {
+    public static Payment toEntity(Long creatorId, Group group, PaymentRequestDto dto) {
         if (Objects.isNull(dto)) {
             return null;
         } else {
@@ -17,7 +18,7 @@ public class PaymentMapper {
                     .price(dto.getPrice())
                     .coPayers(dto.getCoPayers())
                     .creatorId(creatorId)
-                    .groupId(groupId)
+                    .group(group)
                     .build();
         }
     }
@@ -32,7 +33,7 @@ public class PaymentMapper {
                     .price(entity.getPrice())
                     .coPayers(entity.getCoPayers())
                     .creatorId(entity.getCreatorId())
-                    .groupId(entity.getGroupId())
+                    .groupId(entity.getGroup().getId())
                     .timestamp(entity.getTimestamp())
                     .build();
         }

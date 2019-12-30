@@ -1,5 +1,6 @@
 package com.eleks.groupservice.mapper;
 
+import com.eleks.groupservice.domain.Group;
 import com.eleks.groupservice.domain.Payment;
 import com.eleks.groupservice.dto.payment.PaymentRequestDto;
 import com.eleks.groupservice.dto.payment.PaymentResponseDto;
@@ -15,14 +16,16 @@ class PaymentMapperTest {
     @Test
     void toEntity() {
         Long creatorId = 1L;
-        Long groupId = 2L;
+        Group group = Group.builder()
+                .id(2L)
+                .build();
         PaymentRequestDto dto = PaymentRequestDto.builder()
                 .paymentDescription("paymentDescription")
                 .coPayers(Arrays.asList(1L, 2L, 3L))
                 .price(100.5)
                 .build();
 
-        Payment entity = PaymentMapper.toEntity(groupId, creatorId, dto);
+        Payment entity = PaymentMapper.toEntity(creatorId, group, dto);
 
         assertNotNull(entity);
         assertNull(entity.getId());
@@ -30,14 +33,19 @@ class PaymentMapperTest {
         assertEquals(dto.getPaymentDescription(), entity.getPaymentDescription());
         assertEquals(dto.getCoPayers(), entity.getCoPayers());
         assertEquals(dto.getPrice(), entity.getPrice());
+        assertEquals(group.getId(), entity.getGroup().getId());
     }
 
     @Test
     void toDto() {
+        Group group = Group.builder()
+                .id(2L)
+                .build();
+
         Payment entity = Payment.builder()
                 .id(1L)
                 .creatorId(2L)
-                .groupId(3L)
+                .group(group)
                 .paymentDescription("paymentDescription")
                 .price(200.5)
                 .coPayers(Arrays.asList(1L, 2L, 3L))
@@ -49,7 +57,7 @@ class PaymentMapperTest {
         assertNotNull(dto);
         assertEquals(entity.getId(), dto.getId());
         assertEquals(entity.getCreatorId(), dto.getCreatorId());
-        assertEquals(entity.getGroupId(), dto.getGroupId());
+        assertEquals(entity.getGroup().getId(), dto.getGroupId());
         assertEquals(entity.getPaymentDescription(), dto.getPaymentDescription());
         assertEquals(entity.getCoPayers(), dto.getCoPayers());
         assertEquals(entity.getPrice(), dto.getPrice());

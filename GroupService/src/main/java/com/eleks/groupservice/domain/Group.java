@@ -31,5 +31,6 @@ public class Group {
     @Convert(converter = LongListToStringConverter.class)
     private List<Long> members;
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "group", fetch = FetchType.EAGER)
     private Set<Payment> payments;
 }
