@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -29,4 +30,6 @@ public class Group {
     @Column(name = "members")
     @Convert(converter = LongListToStringConverter.class)
     private List<Long> members;
+
+    private Set<Payment> payments;
 }

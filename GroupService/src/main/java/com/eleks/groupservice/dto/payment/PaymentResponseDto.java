@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -17,6 +17,6 @@ public class PaymentResponseDto extends PaymentRequestDto {
     private Long id;
     private Long creatorId;
     private Long groupId;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss'T'dd-MM-yyyy")
-    private LocalDateTime timestamp;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss'T'dd-MM-yyyy", timezone = "UTC")
+    private Instant timestamp;
 }
