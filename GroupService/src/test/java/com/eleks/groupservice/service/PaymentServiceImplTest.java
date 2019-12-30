@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -107,6 +108,37 @@ class PaymentServiceImplTest {
                 () -> service.createPayment(group.getId(), creatorId, paymentRequest));
 
         assertEquals("Payment co-payers are not members of group", ex.getMessage());
+    }
+
+    @Test
+    void getPayment_GroupAndPaymentExists_ShouldReturnResponseModel() {
+        group.getPayments().add(payment);
+
+        when(groupRepo.findById(group.getId())).thenReturn(Optional.of(group));
+
+        Optional<PaymentResponseDto> result = service.getPayment(group.getId(), payment.getId());
+
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    void getPayment_GroupDoesntExist_ShouldReturnEmptyOptional() {
+        when(groupRepo.findById(group.getId())).thenReturn(Optional.empty());
+
+        Optional<PaymentResponseDto> result = service.getPayment(group.getId(), payment.getId());
+
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    void getPayment_GroupExistsButPaymentIsNot_ShouldReturnEmptyOptional() {
+        group.setPayments(Collections.emptySet());
+
+        when(groupRepo.findById(group.getId())).thenReturn(Optional.of(group));
+
+        Optional<PaymentResponseDto> result = service.getPayment(group.getId(), payment.getId());
+
+        assertFalse(result.isPresent());
     }
 
 }
