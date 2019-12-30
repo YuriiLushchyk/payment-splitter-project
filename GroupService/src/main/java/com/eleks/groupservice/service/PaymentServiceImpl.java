@@ -43,7 +43,17 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Optional<PaymentResponseDto> getPayment(Long groupId, Long paymentId) {
-        return Optional.empty();
+        Optional<Group> groupResult = groupRepo.findById(groupId);
+        if (groupResult.isPresent()) {
+            return groupResult.get()
+                    .getPayments()
+                    .stream()
+                    .filter(payment -> payment.getId().equals(paymentId))
+                    .findFirst()
+                    .map(PaymentMapper::toDto);
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
