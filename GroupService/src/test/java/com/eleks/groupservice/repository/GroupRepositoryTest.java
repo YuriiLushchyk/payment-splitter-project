@@ -7,10 +7,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,6 +25,9 @@ class GroupRepositoryTest {
     @Autowired
     GroupRepository repository;
 
+    @Autowired
+    TestEntityManager entityManager;
+
     Group group;
 
     @BeforeEach
@@ -28,24 +35,31 @@ class GroupRepositoryTest {
         group = Group.builder()
                 .groupName("groupName")
                 .currency(Currency.EUR)
-                .members(Arrays.asList(1L, 2L, 3L)).build();
+                .members(Arrays.asList(33L, 44L, 55L)).build();
     }
 
     @Test
     void save_SaveGroupWithoutId_ShouldReturnSavedWithId() {
         Group saved = repository.save(group);
+
+        Group found = entityManager.find(Group.class, saved.getId());
+
         assertNotNull(saved.getId());
+        assertEquals(group.getGroupName(), found.getGroupName());
+        assertEquals(group.getCurrency(), found.getCurrency());
+        assertEquals(group.getMembers(), found.getMembers());
     }
 
     @Test
-    void save_UpdateGroupWithNewName_ShouldReturnUpdatedGroup() {
-        Group saved = repository.save(group);
-        String newName = "newName";
+    @Sql(scripts = "classpath:scripts/insert_test_group.sql")
+    void save_UpdateGroupWithNewData_ShouldReturnUpdatedGroup() {
+        group.setId(1L);
 
-        saved.setGroupName(newName);
+        Group updated = repository.save(group);
 
-        Group updated = repository.save(saved);
-        assertEquals(newName, updated.getGroupName());
+        assertEquals(group.getGroupName(), updated.getGroupName());
+        assertEquals(group.getCurrency(), updated.getCurrency());
+        assertEquals(group.getMembers(), updated.getMembers());
     }
 
     @Test
@@ -60,5 +74,37 @@ class GroupRepositoryTest {
         group.setCurrency(null);
         assertThrows(DataIntegrityViolationException.class,
                 () -> repository.save(group));
+    }
+
+    @Test
+    @Sql(scripts = "classpath:scripts/insert_test_group.sql")
+    void findById_GroupWithIdExists_ReturnUser() {
+        Group found = repository.findById(1L).get();
+
+        assertEquals(1, found.getId());
+        assertEquals("testGroup", found.getGroupName());
+        assertEquals(Currency.UAH, found.getCurrency());
+        assertEquals(Arrays.asList(1L, 2L), found.getMembers());
+    }
+
+    @Test
+    void findById_GroupWithIdDoesntExist_ReturnNothing() {
+        Optional<Group> found = repository.findById(1L);
+
+        assertFalse(found.isPresent());
+    }
+
+    @Test
+    @Sql(scripts = "classpath:scripts/insert_test_group.sql")
+    void deleteById_DeleteExistingGroup_ShouldBeDeleted() {
+        repository.deleteById(1L);
+
+        Group found = entityManager.find(Group.class, 1L);
+        assertNull(found);
+    }
+
+    @Test
+    void deleteById_DeleteNonExistingGroup_ShouldThrowEmptyResultDataAccessException() {
+        assertThrows(EmptyResultDataAccessException.class, () -> repository.deleteById(1L));
     }
 }
