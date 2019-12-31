@@ -11,7 +11,6 @@ import com.eleks.userservice.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -62,7 +61,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDto> searchUsers(UserSearchDto searchDto) {
-        List<User> users = repository.findAllByIdIn(searchDto.getUserIds()).orElse(Collections.emptyList());
+        List<User> users = repository.findAllByIdIn(searchDto.getUserIds());
         return users.stream().map(UserMapper::toDto).collect(Collectors.toList());
     }
 

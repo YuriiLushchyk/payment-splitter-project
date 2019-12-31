@@ -167,7 +167,7 @@ class UserServiceImplTest {
                 User.builder().id(2L).build()
         );
 
-        when(repository.findAllByIdIn(ids)).thenReturn(Optional.of(repoList));
+        when(repository.findAllByIdIn(ids)).thenReturn(repoList);
 
         List<UserResponseDto> responseList = service.searchUsers(new UserSearchDto(ids));
 
@@ -178,7 +178,7 @@ class UserServiceImplTest {
     public void searchUsers_RepositoryReturnsNothing_ShouldReturnEmptyListOfResponses() {
         List<Long> ids = Arrays.asList(1L, 2L);
 
-        when(repository.findAllByIdIn(ids)).thenReturn(Optional.empty());
+        when(repository.findAllByIdIn(ids)).thenReturn(Collections.emptyList());
 
         List<UserResponseDto> responseList = service.searchUsers(new UserSearchDto(ids));
 
