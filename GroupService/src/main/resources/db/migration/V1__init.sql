@@ -12,5 +12,5 @@ CREATE TABLE payment(
   co_payers VARCHAR(255),
   creator_id BIGINT NOT NULL,
   group_id BIGINT NOT NULL,
-  timestamp DATE NOT NULL
+  timestamp TIMESTAMP NOT NULL
 );

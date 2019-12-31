@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -37,7 +37,7 @@ public class Payment {
     private Long creatorId;
 
     @Column(name = "timestamp", nullable = false)
-    @CreatedDate
+    @CreationTimestamp
     private Instant timestamp;
 
     @ManyToOne
