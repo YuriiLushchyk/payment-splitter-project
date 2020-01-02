@@ -17,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -181,7 +181,7 @@ class GroupServiceImplTest {
         group.setMembers(Sets.newHashSet(requester.getId(), member.getId()));
 
         when(repository.findById(group.getId())).thenReturn(Optional.of(group));
-        when(client.getUsersByIds(anySet())).thenReturn(Arrays.asList(requester, member));
+        when(client.getUsersByIds(anySet())).thenReturn(Collections.singletonList(member));
 
         List<UserStatusDto> result = service.getGroupMembersStatus(group.getId(), requester.getId());
 
@@ -194,22 +194,20 @@ class GroupServiceImplTest {
     }
 
     @Test
-    void getGroupMembersStatus_RequesterIsNotInAnyPayment_ShouldReturnStatusWithZeroBalanceForEachUser() {
-        Long requesterId = 1L;
-        List<UserStatusDto> result = service.getGroupMembersStatus(group.getId(), requesterId);
+    void getGroupMembersStatus_GroupHasMembersIdsWhichAreNotValidNow_ShouldReturnStatusForOnlyValidUsers() {
+        UserDto requester = UserDto.builder().id(1L).username("requester").build();
+        UserDto member = UserDto.builder().id(2L).username("member").build();
+        UserDto oldMember = UserDto.builder().id(3L).username("oldMember").build();
 
-        for (UserStatusDto statusDto : result) {
-            assertEquals(0.0, statusDto.getValue());
-        }
-    }
+        group.setMembers(Sets.newHashSet(requester.getId(), member.getId(), oldMember.getId()));
 
-    @Test
-    void getGroupMembersStatus_RequesterOwns50ToEachMembersOfGroup_ShouldReturnRightData() {
+        when(repository.findById(group.getId())).thenReturn(Optional.of(group));
+        when(client.getUsersByIds(anySet())).thenReturn(Collections.singletonList(member));
 
-    }
+        List<UserStatusDto> result = service.getGroupMembersStatus(group.getId(), requester.getId());
 
-    @Test
-    void getGroupMembersStatus_EachMembersOfGroupOwn50ToRequester_ShouldReturnRightData() {
-
+        assertEquals(1, result.size());
+        UserStatusDto statusDto = result.get(0);
+        assertEquals(member.getId(), statusDto.getUserId());
     }
 }

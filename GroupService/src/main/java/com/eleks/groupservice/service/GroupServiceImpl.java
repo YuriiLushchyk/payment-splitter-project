@@ -5,6 +5,7 @@ import com.eleks.groupservice.domain.Group;
 import com.eleks.groupservice.dto.UserStatusDto;
 import com.eleks.groupservice.dto.group.GroupRequestDto;
 import com.eleks.groupservice.dto.group.GroupResponseDto;
+import com.eleks.groupservice.dto.userclient.UserDto;
 import com.eleks.groupservice.exception.ResourceNotFoundException;
 import com.eleks.groupservice.exception.UsersIdsValidationException;
 import com.eleks.groupservice.mapper.GroupMapper;
@@ -13,7 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.eleks.groupservice.service.PaymentsCalculator.calculateValues;
 
 @Service
 public class GroupServiceImpl implements GroupService {
@@ -67,15 +73,29 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public List<UserStatusDto> getGroupMembersStatus(Long groupId, Long requesterId) throws ResourceNotFoundException, UsersIdsValidationException {
-        //find group and check if exists
+        Group group = repository.findById(groupId).orElseThrow(() -> new ResourceNotFoundException("Group doesn't exist"));
 
-        //check if requester if one of members
+        if (!group.getMembers().contains(requesterId)) {
+            throw new UsersIdsValidationException("User is not a member of the group");
+        }
 
-        //get other members info from user service
+        Set<Long> otherMembersIdsFromGroup = group.getMembers()
+                .stream()
+                .filter(memberId -> !memberId.equals(requesterId))
+                .collect(Collectors.toSet());
 
-        //packing
+        List<UserDto> members = client.getUsersByIds(otherMembersIdsFromGroup);
+        List<Long> realMembersIds = members.stream().map(UserDto::getId).collect(Collectors.toList());
+        Map<Long, Double> values = calculateValues(requesterId, group.getPayments(), realMembersIds);
 
-
-        return null;
+        return members.stream()
+                .map(member ->
+                        UserStatusDto.builder()
+                                .userId(member.getId())
+                                .username(member.getUsername())
+                                .currency(group.getCurrency())
+                                .value(values.get(member.getId()))
+                                .build()
+                ).collect(Collectors.toList());
     }
 }
