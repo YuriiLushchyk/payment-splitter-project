@@ -2,6 +2,7 @@ package com.eleks.groupservice.service;
 
 import com.eleks.groupservice.client.UserClient;
 import com.eleks.groupservice.domain.Group;
+import com.eleks.groupservice.dto.UserStatusDto;
 import com.eleks.groupservice.dto.group.GroupRequestDto;
 import com.eleks.groupservice.dto.group.GroupResponseDto;
 import com.eleks.groupservice.exception.ResourceNotFoundException;
@@ -11,6 +12,7 @@ import com.eleks.groupservice.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -61,5 +63,10 @@ public class GroupServiceImpl implements GroupService {
         } else {
             throw new ResourceNotFoundException("Group does't exist");
         }
+    }
+
+    @Override
+    public List<UserStatusDto> getStatus(Long groupId, Long requesterId) throws ResourceNotFoundException, UsersIdsValidationException {
+        return null;
     }
 }

@@ -3,6 +3,7 @@ package com.eleks.groupservice.controller;
 import com.eleks.groupservice.advisor.ResponseExceptionHandler;
 import com.eleks.groupservice.domain.Currency;
 import com.eleks.groupservice.dto.ErrorDto;
+import com.eleks.groupservice.dto.UserStatusDto;
 import com.eleks.groupservice.dto.group.GroupRequestDto;
 import com.eleks.groupservice.dto.group.GroupResponseDto;
 import com.eleks.groupservice.exception.ResourceNotFoundException;
@@ -20,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -337,6 +339,81 @@ class GroupControllerTest {
         assertEquals(error.getStatusCode(), HttpStatus.NOT_FOUND.value());
         assertNotNull(error.getMessages());
         assertEquals(ex.getMessage(), error.getMessages().get(0));
+        assertNotNull(error.getTimestamp());
+    }
+
+    @Test
+    public void getGroupMembersStatus_GroupExistsRequesterIsGroupMember_ReturnListOfStatuses() throws Exception {
+        List<UserStatusDto> status = Arrays.asList(
+                UserStatusDto.builder()
+                        .userId(1L)
+                        .username("username1")
+                        .currency(Currency.UAH)
+                        .value(10D)
+                        .build(),
+                UserStatusDto.builder()
+                        .userId(2L)
+                        .username("username2")
+                        .currency(Currency.UAH)
+                        .value(20D)
+                        .build()
+        );
+        Long groupId = 1L;
+        Long requesterId = 3L;
+
+        when(groupService.getStatus(groupId, requesterId)).thenReturn(status);
+
+        mockMvc.perform(get("/groups/" + groupId + "/users/" + requesterId + "/status"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(objectMapper.writeValueAsString(status)));
+    }
+
+    @Test
+    public void getGroupMembersStatus_GroupDoesntExist_ReturnNotFoundAndError() throws Exception {
+        Long groupId = 1L;
+        Long requesterId = 1L;
+        ResourceNotFoundException ex = new ResourceNotFoundException("msg");
+
+        when(groupService.getStatus(groupId, requesterId)).thenThrow(ex);
+
+        performStatusGetAndExpectErrorStatusAndMessage(groupId, requesterId, 404, ex.getMessage());
+    }
+
+    @Test
+    public void getGroupMembersStatus_GroupExistsButRequesterIsNotAMember_ReturnBadRequestAndError() throws Exception {
+        Long groupId = 1L;
+        Long requesterId = 1L;
+        UsersIdsValidationException ex = new UsersIdsValidationException("msg");
+
+        when(groupService.getStatus(groupId, requesterId)).thenThrow(ex);
+
+        performStatusGetAndExpectErrorStatusAndMessage(groupId, requesterId, 400, ex.getMessage());
+    }
+
+    @Test
+    public void getGroupMembersStatus_UserServiceError_ReturnServerErrorAndError() throws Exception {
+        Long groupId = 1L;
+        Long requesterId = 1L;
+        UserServiceException ex = new UserServiceException("msg");
+
+        when(groupService.getStatus(groupId, requesterId)).thenThrow(ex);
+
+        performStatusGetAndExpectErrorStatusAndMessage(groupId, requesterId, 500, ex.getMessage());
+    }
+
+    private void performStatusGetAndExpectErrorStatusAndMessage(Long groupId, Long requesterId, int expectedStatus, String expectedMsg) throws Exception {
+        String errorJson = mockMvc.perform(get("/groups/" + groupId + "/users/" + requesterId + "/status"))
+                .andExpect(status().is(expectedStatus))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorDto error = objectMapper.readValue(errorJson, ErrorDto.class);
+
+        assertEquals(error.getStatusCode(), expectedStatus);
+        assertNotNull(error.getMessages());
+        assertEquals(1, error.getMessages().size());
+        assertEquals(expectedMsg, error.getMessages().get(0));
         assertNotNull(error.getTimestamp());
     }
 
