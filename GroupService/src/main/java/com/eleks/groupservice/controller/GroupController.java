@@ -1,5 +1,6 @@
 package com.eleks.groupservice.controller;
 
+import com.eleks.groupservice.dto.UserStatusDto;
 import com.eleks.groupservice.dto.group.GroupRequestDto;
 import com.eleks.groupservice.dto.group.GroupResponseDto;
 import com.eleks.groupservice.exception.ResourceNotFoundException;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 public class GroupController {
@@ -37,5 +39,10 @@ public class GroupController {
     @DeleteMapping("/groups/{id}")
     public void deleteGroup(@PathVariable Long id) {
         service.deleteGroupById(id);
+    }
+
+    @GetMapping("/groups/{groupId}/users/{userId}/status")
+    public List<UserStatusDto> getGroupMembersStatus(@PathVariable Long groupId, @PathVariable Long userId) {
+        return service.getGroupMembersStatus(groupId, userId);
     }
 }

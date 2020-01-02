@@ -361,7 +361,7 @@ class GroupControllerTest {
         Long groupId = 1L;
         Long requesterId = 3L;
 
-        when(groupService.getStatus(groupId, requesterId)).thenReturn(status);
+        when(groupService.getGroupMembersStatus(groupId, requesterId)).thenReturn(status);
 
         mockMvc.perform(get("/groups/" + groupId + "/users/" + requesterId + "/status"))
                 .andExpect(status().isOk())
@@ -375,7 +375,7 @@ class GroupControllerTest {
         Long requesterId = 1L;
         ResourceNotFoundException ex = new ResourceNotFoundException("msg");
 
-        when(groupService.getStatus(groupId, requesterId)).thenThrow(ex);
+        when(groupService.getGroupMembersStatus(groupId, requesterId)).thenThrow(ex);
 
         performStatusGetAndExpectErrorStatusAndMessage(groupId, requesterId, 404, ex.getMessage());
     }
@@ -386,7 +386,7 @@ class GroupControllerTest {
         Long requesterId = 1L;
         UsersIdsValidationException ex = new UsersIdsValidationException("msg");
 
-        when(groupService.getStatus(groupId, requesterId)).thenThrow(ex);
+        when(groupService.getGroupMembersStatus(groupId, requesterId)).thenThrow(ex);
 
         performStatusGetAndExpectErrorStatusAndMessage(groupId, requesterId, 400, ex.getMessage());
     }
@@ -397,7 +397,7 @@ class GroupControllerTest {
         Long requesterId = 1L;
         UserServiceException ex = new UserServiceException("msg");
 
-        when(groupService.getStatus(groupId, requesterId)).thenThrow(ex);
+        when(groupService.getGroupMembersStatus(groupId, requesterId)).thenThrow(ex);
 
         performStatusGetAndExpectErrorStatusAndMessage(groupId, requesterId, 500, ex.getMessage());
     }

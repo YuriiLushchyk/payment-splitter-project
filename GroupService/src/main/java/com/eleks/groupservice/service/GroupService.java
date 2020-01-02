@@ -18,5 +18,5 @@ public interface GroupService {
 
     void deleteGroupById(Long id) throws ResourceNotFoundException;
 
-    List<UserStatusDto> getStatus(Long groupId, Long requesterId) throws ResourceNotFoundException, UsersIdsValidationException;
+    List<UserStatusDto> getGroupMembersStatus(Long groupId, Long requesterId) throws ResourceNotFoundException, UsersIdsValidationException;
 }
