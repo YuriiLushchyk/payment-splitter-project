@@ -180,7 +180,7 @@ class GroupServiceImplTest {
         group.setMembers(Arrays.asList(requester.getId(), member.getId()));
 
         when(repository.findById(group.getId())).thenReturn(Optional.of(group));
-        when(client.searchUsersByIds(anyList())).thenReturn(Arrays.asList(requester, member));
+        when(client.getUsersByIds(anyList())).thenReturn(Arrays.asList(requester, member));
 
         List<UserStatusDto> result = service.getGroupMembersStatus(group.getId(), requester.getId());
 

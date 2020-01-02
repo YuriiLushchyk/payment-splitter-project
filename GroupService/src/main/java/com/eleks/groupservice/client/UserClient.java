@@ -9,9 +9,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -28,24 +29,31 @@ public class UserClient {
 
     public boolean areUserIdsValid(List<Long> userIds) throws UserServiceException {
         try {
-            return validateOnUserService(userIds);
+            return getUsersFromUserService(userIds).size() == userIds.size();
         } catch (HttpClientErrorException ex) {
             log.info("Client error during request to UserService");
             return false;
+        }
+    }
+
+    public List<UserDto> getUsersByIds(List<Long> userIds) throws UserServiceException {
+        try {
+            return getUsersFromUserService(userIds);
+        } catch (HttpClientErrorException ex) {
+            log.info("Client error during request to UserService");
+            return Collections.emptyList();
+        }
+    }
+
+    private List<UserDto> getUsersFromUserService(List<Long> userIds) throws HttpClientErrorException, UserServiceException {
+        try {
+            String url = baseUrl + "/users/search";
+            UserSearchDto requestDto = new UserSearchDto(userIds);
+            UserDto[] responseEntity = restTemplate.postForEntity(url, requestDto, UserDto[].class).getBody();
+            return responseEntity == null ? Collections.emptyList() : Arrays.asList(responseEntity);
         } catch (HttpServerErrorException ex) {
             log.info("Server error during request to UserService");
             throw new UserServiceException("Server error during request to UserService");
         }
-    }
-
-    public List<UserDto> searchUsersByIds(List<Long> ids) {
-        return null;
-    }
-
-    private boolean validateOnUserService(List<Long> userIds) throws RestClientException {
-        String url = baseUrl + "/users/search";
-        UserSearchDto requestDto = new UserSearchDto(userIds);
-        UserDto[] responseEntity = restTemplate.postForEntity(url, requestDto, UserDto[].class).getBody();
-        return responseEntity != null && responseEntity.length == userIds.size();
     }
 }

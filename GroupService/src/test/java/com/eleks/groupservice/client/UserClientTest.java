@@ -1,5 +1,6 @@
 package com.eleks.groupservice.client;
 
+import com.eleks.groupservice.dto.userclient.UserDto;
 import com.eleks.groupservice.dto.userclient.UserSearchDto;
 import com.eleks.groupservice.exception.UserServiceException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -93,6 +94,63 @@ class UserClientTest {
 
         UserServiceException exception = assertThrows(UserServiceException.class,
                 () -> client.areUserIdsValid(userIds));
+
+        verifyPostOnSearchWithRequestDto(searchDto);
+        assertEquals("Server error during request to UserService", exception.getMessage());
+    }
+
+    @Test
+    void getUsersByIds_ServiceReturnsThreeUsers_ShouldReturnListOfThreeUsers() throws Exception {
+        UserSearchDto searchDto = new UserSearchDto(userIds);
+
+        wm.stubFor(post(urlEqualTo("/users/search"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBodyFile("user_search_response_with_three_users.json")));
+
+        List<UserDto> result = client.getUsersByIds(userIds);
+
+        verifyPostOnSearchWithRequestDto(searchDto);
+        assertEquals(3, result.size());
+    }
+
+    @Test
+    void getUsersByIds_ServiceReturnsEmptyList_ShouldReturnEmptyList() throws Exception {
+        UserSearchDto searchDto = new UserSearchDto(userIds);
+
+        wm.stubFor(post(urlEqualTo("/users/search"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("[]")));
+
+        List<UserDto> result = client.getUsersByIds(userIds);
+
+        verifyPostOnSearchWithRequestDto(searchDto);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getUsersByIds_ServiceReturnsBadRequest_ShouldReturnEmptyList() throws Exception {
+        UserSearchDto searchDto = new UserSearchDto(userIds);
+
+        wm.stubFor(post(urlEqualTo("/users/search"))
+                .willReturn(status(400)));
+
+        List<UserDto> result = client.getUsersByIds(userIds);
+
+        verifyPostOnSearchWithRequestDto(searchDto);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getUsersByIds_ServiceReturnsServerError_ShouldThrowException() throws Exception {
+        UserSearchDto searchDto = new UserSearchDto(userIds);
+
+        wm.stubFor(post(urlEqualTo("/users/search"))
+                .willReturn(status(500)));
+
+        UserServiceException exception = assertThrows(UserServiceException.class,
+                () -> client.getUsersByIds(userIds));
 
         verifyPostOnSearchWithRequestDto(searchDto);
         assertEquals("Server error during request to UserService", exception.getMessage());
