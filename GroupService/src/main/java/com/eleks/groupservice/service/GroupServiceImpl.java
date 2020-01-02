@@ -67,6 +67,15 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public List<UserStatusDto> getGroupMembersStatus(Long groupId, Long requesterId) throws ResourceNotFoundException, UsersIdsValidationException {
+        //find group and check if exists
+
+        //check if requester if one of members
+
+        //get other members info from user service
+
+        //packing
+
+
         return null;
     }
 }

@@ -3,8 +3,10 @@ package com.eleks.groupservice.service;
 import com.eleks.groupservice.client.UserClient;
 import com.eleks.groupservice.domain.Currency;
 import com.eleks.groupservice.domain.Group;
+import com.eleks.groupservice.dto.UserStatusDto;
 import com.eleks.groupservice.dto.group.GroupRequestDto;
 import com.eleks.groupservice.dto.group.GroupResponseDto;
+import com.eleks.groupservice.dto.userclient.UserDto;
 import com.eleks.groupservice.exception.ResourceNotFoundException;
 import com.eleks.groupservice.exception.UsersIdsValidationException;
 import com.eleks.groupservice.repository.GroupRepository;
@@ -15,10 +17,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,7 +39,7 @@ class GroupServiceImplTest {
 
     GroupRequestDto requestDto;
 
-    Group entity;
+    Group group;
 
     @BeforeEach
     void setUp() {
@@ -47,7 +51,7 @@ class GroupServiceImplTest {
                 .members(Arrays.asList(1L, 2L, 3L))
                 .build();
 
-        entity = Group.builder()
+        group = Group.builder()
                 .id(21L)
                 .groupName(requestDto.getGroupName())
                 .currency(requestDto.getCurrency())
@@ -58,7 +62,7 @@ class GroupServiceImplTest {
     @Test
     void saveGroup_GroupMembersAreExist_ReturnSavedUser() {
         when(client.areUserIdsValid(requestDto.getMembers())).thenReturn(true);
-        when(repository.save(any(Group.class))).thenReturn(entity);
+        when(repository.save(any(Group.class))).thenReturn(group);
 
         GroupResponseDto responseDto = service.saveGroup(requestDto);
 
@@ -77,40 +81,40 @@ class GroupServiceImplTest {
 
     @Test
     void getGroup_GroupExists_ReturnGroupResponseDto() {
-        when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
+        when(repository.findById(group.getId())).thenReturn(Optional.of(group));
 
-        Optional<GroupResponseDto> result = service.getGroup(entity.getId());
+        Optional<GroupResponseDto> result = service.getGroup(group.getId());
 
         assertTrue(result.isPresent());
     }
 
     @Test
     void getGroup_GroupDoesntExist_ReturnEmptyOptional() {
-        when(repository.findById(entity.getId())).thenReturn(Optional.empty());
+        when(repository.findById(group.getId())).thenReturn(Optional.empty());
 
-        Optional<GroupResponseDto> result = service.getGroup(entity.getId());
+        Optional<GroupResponseDto> result = service.getGroup(group.getId());
 
         assertFalse(result.isPresent());
     }
 
     @Test
     void editGroup_GroupAndMembersAreExist_ReturnResponseDto() {
-        when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
+        when(repository.findById(group.getId())).thenReturn(Optional.of(group));
         when(client.areUserIdsValid(requestDto.getMembers())).thenReturn(true);
 
-        when(repository.save(any(Group.class))).thenReturn(entity);
+        when(repository.save(any(Group.class))).thenReturn(group);
 
-        GroupResponseDto result = service.editGroup(entity.getId(), requestDto);
+        GroupResponseDto result = service.editGroup(group.getId(), requestDto);
 
         assertNotNull(result);
-        assertEquals(entity.getId(), result.getId());
+        assertEquals(group.getId(), result.getId());
     }
 
     @Test
     void editGroup_GroupDoesntExist_ThrowResourceNotFoundException() {
-        when(repository.findById(entity.getId())).thenReturn(Optional.empty());
+        when(repository.findById(group.getId())).thenReturn(Optional.empty());
 
-        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class, () -> service.editGroup(entity.getId(), requestDto));
+        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class, () -> service.editGroup(group.getId(), requestDto));
 
         assertEquals("Group does't exist", ex.getMessage());
     }
@@ -126,9 +130,9 @@ class GroupServiceImplTest {
     }
 
     @Test
-    public void deleteGroupById_GroupWithIdExists_CallRepositoryDelete() {
+    void deleteGroupById_GroupWithIdExists_CallRepositoryDelete() {
         Long id = 1L;
-        when(repository.findById(id)).thenReturn(Optional.of(entity));
+        when(repository.findById(id)).thenReturn(Optional.of(group));
 
         service.deleteGroupById(id);
 
@@ -136,12 +140,75 @@ class GroupServiceImplTest {
     }
 
     @Test
-    public void deleteGroupById_GroupWithIdDoesntExist_ThrowResourceNotFoundException() {
+    void deleteGroupById_GroupWithIdDoesntExist_ThrowResourceNotFoundException() {
         Long id = 1L;
         when(repository.findById(id)).thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> service.deleteGroupById(id));
 
         assertEquals("Group does't exist", exception.getMessage());
+    }
+
+    @Test
+    void getGroupMembersStatus_GroupDoesntExist_ThrowResourceNotFoundException() {
+        Long requesterId = 1L;
+
+        when(repository.findById(group.getId())).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> service.getGroupMembersStatus(group.getId(), requesterId));
+        assertEquals("Group doesn't exist", exception.getMessage());
+    }
+
+    @Test
+    void getGroupMembersStatus_RequesterIsNotOneOfMembers_ThrowUsersIdsValidationException() {
+        Long requesterId = 1L;
+        group.setMembers(Arrays.asList(2L, 3L));
+
+        when(repository.findById(group.getId())).thenReturn(Optional.of(group));
+
+        UsersIdsValidationException exception = assertThrows(UsersIdsValidationException.class,
+                () -> service.getGroupMembersStatus(group.getId(), requesterId));
+        assertEquals("User is not a member of the group", exception.getMessage());
+    }
+
+    @Test
+    void getGroupMembersStatus_GroupHasRequesterAndOneMoreUserAndNoPayments_ShouldReturnStatusWithRightCurrencyAndUserDataAndZeroBalance() {
+        UserDto requester = UserDto.builder().id(1L).username("requester").build();
+        UserDto member = UserDto.builder().id(2L).username("member").build();
+
+        group.setMembers(Arrays.asList(requester.getId(), member.getId()));
+
+        when(repository.findById(group.getId())).thenReturn(Optional.of(group));
+        when(client.searchUsersByIds(anyList())).thenReturn(Arrays.asList(requester, member));
+
+        List<UserStatusDto> result = service.getGroupMembersStatus(group.getId(), requester.getId());
+
+        assertEquals(1, result.size());
+        UserStatusDto statusDto = result.get(0);
+        assertEquals(group.getCurrency(), statusDto.getCurrency());
+        assertEquals(member.getUsername(), statusDto.getUsername());
+        assertEquals(member.getId(), statusDto.getUserId());
+        assertEquals(0.0, statusDto.getValue());
+    }
+
+    @Test
+    void getGroupMembersStatus_RequesterIsNotInAnyPayment_ShouldReturnStatusWithZeroBalanceForEachUser() {
+        Long requesterId = 1L;
+        List<UserStatusDto> result = service.getGroupMembersStatus(group.getId(), requesterId);
+
+        for (UserStatusDto statusDto : result) {
+            assertEquals(0.0, statusDto.getValue());
+        }
+    }
+
+    @Test
+    void getGroupMembersStatus_RequesterOwns50ToEachMembersOfGroup_ShouldReturnRightData() {
+
+    }
+
+    @Test
+    void getGroupMembersStatus_EachMembersOfGroupOwn50ToRequester_ShouldReturnRightData() {
+
     }
 }

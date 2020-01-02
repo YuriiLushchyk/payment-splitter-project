@@ -38,6 +38,10 @@ public class UserClient {
         }
     }
 
+    public List<UserDto> searchUsersByIds(List<Long> ids) {
+        return null;
+    }
+
     private boolean validateOnUserService(List<Long> userIds) throws RestClientException {
         String url = baseUrl + "/users/search";
         UserSearchDto requestDto = new UserSearchDto(userIds);
