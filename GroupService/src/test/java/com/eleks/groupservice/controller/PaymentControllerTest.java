@@ -8,6 +8,7 @@ import com.eleks.groupservice.exception.ResourceNotFoundException;
 import com.eleks.groupservice.exception.UsersIdsValidationException;
 import com.eleks.groupservice.service.PaymentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,7 @@ class PaymentControllerTest {
         requestDto = PaymentRequestDto.builder()
                 .paymentDescription("paymentDescription")
                 .price(200.50)
-                .coPayers(Arrays.asList(1L, 2L, 3L))
+                .coPayers(Sets.newHashSet(1L, 2L, 3L))
                 .build();
 
         responseDto = PaymentResponseDto.builder()

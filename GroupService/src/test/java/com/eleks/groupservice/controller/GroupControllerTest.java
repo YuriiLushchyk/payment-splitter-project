@@ -11,6 +11,7 @@ import com.eleks.groupservice.exception.UserServiceException;
 import com.eleks.groupservice.exception.UsersIdsValidationException;
 import com.eleks.groupservice.service.GroupService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,7 @@ class GroupControllerTest {
         requestDto = GroupRequestDto.builder()
                 .groupName("groupName")
                 .currency(Currency.EUR)
-                .members(Arrays.asList(1L, 2L, 3L))
+                .members(Sets.newHashSet(1L, 2L, 3L))
                 .build();
 
         responseDto = GroupResponseDto.builder()

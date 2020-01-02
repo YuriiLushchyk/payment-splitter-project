@@ -1,6 +1,6 @@
 package com.eleks.groupservice.domain;
 
-import com.eleks.groupservice.converter.LongListToStringConverter;
+import com.eleks.groupservice.converter.LongSetToStringConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,8 +9,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Builder
@@ -29,9 +29,9 @@ public class Payment {
     private Double price;
 
     @Column(name = "co_payers")
-    @Convert(converter = LongListToStringConverter.class)
+    @Convert(converter = LongSetToStringConverter.class)
     @Builder.Default
-    private List<Long> coPayers = new ArrayList<>();
+    private Set<Long> coPayers = new HashSet<>();
 
     @Column(name = "creator_id")
     private Long creatorId;

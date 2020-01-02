@@ -4,9 +4,8 @@ import com.eleks.groupservice.domain.Currency;
 import com.eleks.groupservice.domain.Group;
 import com.eleks.groupservice.dto.group.GroupRequestDto;
 import com.eleks.groupservice.dto.group.GroupResponseDto;
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -18,7 +17,7 @@ class GroupMapperTest {
         GroupRequestDto dto = GroupRequestDto.builder()
                 .groupName("groupName")
                 .currency(Currency.UAH)
-                .members(Arrays.asList(1L, 2L, 3L))
+                .members(Sets.newHashSet(1L, 2L, 3L))
                 .build();
 
         Group entity = GroupMapper.toEntity(dto);
@@ -40,7 +39,7 @@ class GroupMapperTest {
                 .id(1L)
                 .groupName("groupName")
                 .currency(Currency.UAH)
-                .members(Arrays.asList(1L, 2L, 3L))
+                .members(Sets.newHashSet(1L, 2L, 3L))
                 .build();
 
         GroupResponseDto dto = GroupMapper.toDto(entity);

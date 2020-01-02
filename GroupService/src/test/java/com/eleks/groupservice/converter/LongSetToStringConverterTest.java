@@ -1,33 +1,33 @@
 package com.eleks.groupservice.converter;
 
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class LongListToStringConverterTest {
+class LongSetToStringConverterTest {
 
-    LongListToStringConverter converter;
+    LongSetToStringConverter converter;
 
     @BeforeEach
     void setUp() {
-        converter = new LongListToStringConverter();
+        converter = new LongSetToStringConverter();
     }
 
     @Test
     void convertToDatabaseColumn_GivenListOfThreeLong_ReturnStringWithThreeDigits() {
-        List<Long> digits = Arrays.asList(1L, 2L, 20L);
+        Set<Long> digits = Sets.newHashSet(1L, 2L, 20L);
         String converted = converter.convertToDatabaseColumn(digits);
         assertEquals("1;2;20", converted);
     }
 
     @Test
     void convertToDatabaseColumn_GivenEmptyList_ReturnNull() {
-        List<Long> digits = Collections.emptyList();
+        Set<Long> digits = Collections.emptySet();
         String converted = converter.convertToDatabaseColumn(digits);
         assertNull(converted);
     }
@@ -42,22 +42,22 @@ class LongListToStringConverterTest {
     void convertToEntityAttribute_GivenStringsWithIds_ReturnListOfLongs() {
         String data = "1;2;20";
 
-        List<Long> digits = converter.convertToEntityAttribute(data);
+        Set<Long> digits = converter.convertToEntityAttribute(data);
 
-        assertEquals(1L, digits.get(0));
-        assertEquals(2L, digits.get(1));
-        assertEquals(20L, digits.get(2));
+        assertTrue(digits.contains(1L));
+        assertTrue(digits.contains(2L));
+        assertTrue(digits.contains(20L));
     }
 
     @Test
     void convertToEntityAttribute_GivenEmptyString_ReturnEmptyList() {
-        List<Long> digits = converter.convertToEntityAttribute("");
+        Set<Long> digits = converter.convertToEntityAttribute("");
         assertTrue(digits.isEmpty());
     }
 
     @Test
     void convertToEntityAttribute_GivenNull_ReturnEmptyList() {
-        List<Long> digits = converter.convertToEntityAttribute(null);
+        Set<Long> digits = converter.convertToEntityAttribute(null);
         assertTrue(digits.isEmpty());
     }
 }

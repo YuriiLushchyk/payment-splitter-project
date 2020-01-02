@@ -4,10 +4,10 @@ import com.eleks.groupservice.domain.Group;
 import com.eleks.groupservice.domain.Payment;
 import com.eleks.groupservice.dto.payment.PaymentRequestDto;
 import com.eleks.groupservice.dto.payment.PaymentResponseDto;
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +21,7 @@ class PaymentMapperTest {
                 .build();
         PaymentRequestDto dto = PaymentRequestDto.builder()
                 .paymentDescription("paymentDescription")
-                .coPayers(Arrays.asList(1L, 2L, 3L))
+                .coPayers(Sets.newHashSet(1L, 2L, 3L))
                 .price(100.5)
                 .build();
 
@@ -48,7 +48,7 @@ class PaymentMapperTest {
                 .group(group)
                 .paymentDescription("paymentDescription")
                 .price(200.5)
-                .coPayers(Arrays.asList(1L, 2L, 3L))
+                .coPayers(Sets.newHashSet(1L, 2L, 3L))
                 .timestamp(Instant.now())
                 .build();
 

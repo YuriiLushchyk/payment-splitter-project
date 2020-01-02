@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @SuperBuilder
@@ -23,5 +23,5 @@ public class GroupRequestDto {
     private Currency currency;
 
     @NotNull(message = "members is required")
-    private List<Long> members;
+    private Set<Long> members;
 }

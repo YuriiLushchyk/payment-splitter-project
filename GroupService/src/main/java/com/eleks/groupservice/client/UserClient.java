@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -27,7 +28,7 @@ public class UserClient {
         this.restTemplate = restTemplate;
     }
 
-    public boolean areUserIdsValid(List<Long> userIds) throws UserServiceException {
+    public boolean areUserIdsValid(Set<Long> userIds) throws UserServiceException {
         try {
             return getUsersFromUserService(userIds).size() == userIds.size();
         } catch (HttpClientErrorException ex) {
@@ -36,7 +37,7 @@ public class UserClient {
         }
     }
 
-    public List<UserDto> getUsersByIds(List<Long> userIds) throws UserServiceException {
+    public List<UserDto> getUsersByIds(Set<Long> userIds) throws UserServiceException {
         try {
             return getUsersFromUserService(userIds);
         } catch (HttpClientErrorException ex) {
@@ -45,7 +46,7 @@ public class UserClient {
         }
     }
 
-    private List<UserDto> getUsersFromUserService(List<Long> userIds) throws HttpClientErrorException, UserServiceException {
+    private List<UserDto> getUsersFromUserService(Set<Long> userIds) throws HttpClientErrorException, UserServiceException {
         try {
             String url = baseUrl + "/users/search";
             UserSearchDto requestDto = new UserSearchDto(userIds);

@@ -3,6 +3,7 @@ package com.eleks.groupservice.repository;
 import com.eleks.groupservice.domain.Currency;
 import com.eleks.groupservice.domain.Group;
 import com.eleks.groupservice.domain.Payment;
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +14,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,13 +38,13 @@ class PaymentRepositoryTest {
                 .id(1L)
                 .groupName("testGroup")
                 .currency(Currency.UAH)
-                .members(Arrays.asList(1L, 2L)).build();
+                .members(Sets.newHashSet(1L, 2L)).build();
 
         payment = Payment.builder()
                 .creatorId(1L)
                 .group(group)
                 .price(200D)
-                .coPayers(Arrays.asList(1L, 2L))
+                .coPayers(Sets.newHashSet(1L, 2L))
                 .paymentDescription("payment description")
                 .build();
         group.getPayments().add(payment);

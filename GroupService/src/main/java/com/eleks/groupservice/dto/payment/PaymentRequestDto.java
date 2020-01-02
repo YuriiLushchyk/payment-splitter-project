@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @SuperBuilder
@@ -24,5 +24,5 @@ public class PaymentRequestDto {
     private Double price;
 
     @NotNull(message = "coPayers is required")
-    private List<Long> coPayers;
+    private Set<Long> coPayers;
 }

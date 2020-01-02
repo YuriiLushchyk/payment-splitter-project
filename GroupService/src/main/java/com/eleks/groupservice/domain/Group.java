@@ -1,6 +1,6 @@
 package com.eleks.groupservice.domain;
 
-import com.eleks.groupservice.converter.LongListToStringConverter;
+import com.eleks.groupservice.converter.LongSetToStringConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -28,9 +30,9 @@ public class Group {
     private Currency currency;
 
     @Column(name = "members")
-    @Convert(converter = LongListToStringConverter.class)
+    @Convert(converter = LongSetToStringConverter.class)
     @Builder.Default
-    private List<Long> members = new ArrayList<>();
+    private Set<Long> members = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "group", fetch = FetchType.EAGER)
     @Builder.Default

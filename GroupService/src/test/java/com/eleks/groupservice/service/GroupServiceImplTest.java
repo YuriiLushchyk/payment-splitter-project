@@ -10,6 +10,7 @@ import com.eleks.groupservice.dto.userclient.UserDto;
 import com.eleks.groupservice.exception.ResourceNotFoundException;
 import com.eleks.groupservice.exception.UsersIdsValidationException;
 import com.eleks.groupservice.repository.GroupRepository;
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +23,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,7 +49,7 @@ class GroupServiceImplTest {
         requestDto = GroupRequestDto.builder()
                 .groupName("groupName")
                 .currency(Currency.EUR)
-                .members(Arrays.asList(1L, 2L, 3L))
+                .members(Sets.newHashSet(1L, 2L, 3L))
                 .build();
 
         group = Group.builder()
@@ -163,7 +164,7 @@ class GroupServiceImplTest {
     @Test
     void getGroupMembersStatus_RequesterIsNotOneOfMembers_ThrowUsersIdsValidationException() {
         Long requesterId = 1L;
-        group.setMembers(Arrays.asList(2L, 3L));
+        group.setMembers(Sets.newHashSet(2L, 3L));
 
         when(repository.findById(group.getId())).thenReturn(Optional.of(group));
 
@@ -177,10 +178,10 @@ class GroupServiceImplTest {
         UserDto requester = UserDto.builder().id(1L).username("requester").build();
         UserDto member = UserDto.builder().id(2L).username("member").build();
 
-        group.setMembers(Arrays.asList(requester.getId(), member.getId()));
+        group.setMembers(Sets.newHashSet(requester.getId(), member.getId()));
 
         when(repository.findById(group.getId())).thenReturn(Optional.of(group));
-        when(client.getUsersByIds(anyList())).thenReturn(Arrays.asList(requester, member));
+        when(client.getUsersByIds(anySet())).thenReturn(Arrays.asList(requester, member));
 
         List<UserStatusDto> result = service.getGroupMembersStatus(group.getId(), requester.getId());
 

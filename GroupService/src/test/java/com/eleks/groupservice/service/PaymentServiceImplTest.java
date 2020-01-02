@@ -9,6 +9,7 @@ import com.eleks.groupservice.exception.ResourceNotFoundException;
 import com.eleks.groupservice.exception.UsersIdsValidationException;
 import com.eleks.groupservice.repository.GroupRepository;
 import com.eleks.groupservice.repository.PaymentRepository;
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -51,13 +51,13 @@ class PaymentServiceImplTest {
     void setUp() {
         paymentRequest = PaymentRequestDto.builder()
                 .paymentDescription("paymentDescription")
-                .coPayers(Arrays.asList(1L, 2L))
+                .coPayers(Sets.newHashSet(1L, 2L))
                 .price(100D)
                 .build();
 
         group = Group.builder()
                 .id(1L)
-                .members(Arrays.asList(1L, 2L))
+                .members(Sets.newHashSet(1L, 2L))
                 .currency(Currency.UAH)
                 .groupName("groupName")
                 .build();
@@ -104,7 +104,7 @@ class PaymentServiceImplTest {
     @Test
     void createPayment_CoPayersIdsNotFromRequestedGroup_ThrowUsersIdsValidationException() {
         when(groupRepo.findById(group.getId())).thenReturn(Optional.of(group));
-        paymentRequest.setCoPayers(Arrays.asList(42L, 24L));
+        paymentRequest.setCoPayers(Sets.newHashSet(42L, 24L));
 
         UsersIdsValidationException ex = assertThrows(UsersIdsValidationException.class,
                 () -> service.createPayment(group.getId(), creatorId, paymentRequest));

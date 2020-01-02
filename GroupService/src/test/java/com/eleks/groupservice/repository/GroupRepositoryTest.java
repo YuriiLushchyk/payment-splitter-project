@@ -2,6 +2,7 @@ package com.eleks.groupservice.repository;
 
 import com.eleks.groupservice.domain.Currency;
 import com.eleks.groupservice.domain.Group;
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +14,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,7 +35,7 @@ class GroupRepositoryTest {
         group = Group.builder()
                 .groupName("groupName")
                 .currency(Currency.EUR)
-                .members(Arrays.asList(33L, 44L, 55L)).build();
+                .members(Sets.newHashSet(33L, 44L, 55L)).build();
     }
 
     @Test
@@ -84,7 +84,7 @@ class GroupRepositoryTest {
         assertEquals(1, found.getId());
         assertEquals("testGroup", found.getGroupName());
         assertEquals(Currency.UAH, found.getCurrency());
-        assertEquals(Arrays.asList(1L, 2L), found.getMembers());
+        assertEquals(Sets.newHashSet(1L, 2L), found.getMembers());
     }
 
     @Test

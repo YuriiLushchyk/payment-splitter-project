@@ -5,6 +5,7 @@ import com.eleks.groupservice.dto.userclient.UserSearchDto;
 import com.eleks.groupservice.exception.UserServiceException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.google.common.collect.Sets;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -12,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,7 +24,7 @@ class UserClientTest {
 
     static WireMockServer wm = new WireMockServer(7777);
 
-    static List<Long> userIds;
+    static Set<Long> userIds;
 
     @Autowired
     UserClient client;
@@ -34,7 +35,7 @@ class UserClientTest {
     @BeforeAll
     static void setUp() {
         wm.start();
-        userIds = Arrays.asList(1L, 2L, 3L);
+        userIds = Sets.newHashSet(1L, 2L, 3L);
     }
 
     @AfterAll
