@@ -1,14 +1,25 @@
 package com.eleks.userservice.dto.user;
 
+import com.eleks.userservice.serializer.SimpleDateJsonDeserializer;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
-@EqualsAndHashCode(callSuper = true)
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
-@SuperBuilder
-public class UserResponseDto extends UserRequestDto {
+@AllArgsConstructor
+@Builder
+public class UserResponseDto {
     private Long id;
+    private String username;
+    private String firstName;
+    private String lastName;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = SimpleDateJsonDeserializer.PATTERN)
+    private LocalDate dateOfBirth;
+    private String email;
+    private Boolean receiveNotifications;
 }

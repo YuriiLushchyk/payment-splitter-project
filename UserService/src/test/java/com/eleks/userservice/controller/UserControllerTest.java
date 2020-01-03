@@ -60,6 +60,7 @@ public class UserControllerTest {
 
         userRequestDto = UserRequestDto.builder()
                 .username("username")
+                .password("Passw0rd")
                 .firstName("firstName")
                 .lastName("lastName")
                 .dateOfBirth(LocalDate.now())
@@ -265,6 +266,27 @@ public class UserControllerTest {
         postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
+    @Test
+    public void createUser_WithoutPassword_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setPassword(null);
+        String errorMsg = "password is required";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void createUser_TooSmallPassword_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setPassword("1234567");
+        String errorMsg = "password length should be between 8 and 50";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void createUser_TooLongPassword_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setPassword(RANDOM_51_STRING);
+        String errorMsg = "password length should be between 8 and 50";
+        postUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
+    }
+
     private void postUserDataAndExpectBadRequestErrorWithSingleMsg(String content, String errorMsg) throws Exception {
         String responseBody = mockMvc.perform(post("/users/")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -337,7 +359,6 @@ public class UserControllerTest {
 
     @Test
     public void editUser_WithoutUsername_ReturnBadRequestAndError() throws Exception {
-        Long id = 1L;
         userRequestDto.setUsername(null);
         String errorMsg = "username is required";
         putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
@@ -345,7 +366,6 @@ public class UserControllerTest {
 
     @Test
     public void editUser_WithBlankUsername_ReturnBadRequestAndError() throws Exception {
-        Long id = 1L;
         userRequestDto.setUsername("");
         String errorMsg = "username length should be between 1 and 50";
         putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
@@ -353,7 +373,6 @@ public class UserControllerTest {
 
     @Test
     public void editUser_WithTooLongUsername_ReturnBadRequestAndError() throws Exception {
-        Long id = 1L;
         userRequestDto.setUsername(RANDOM_51_STRING);
         String errorMsg = "username length should be between 1 and 50";
         putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
@@ -361,7 +380,6 @@ public class UserControllerTest {
 
     @Test
     public void editUser_WithoutFirstName_ReturnBadRequestAndError() throws Exception {
-        Long id = 1L;
         userRequestDto.setFirstName(null);
         String errorMsg = "firstName is required";
         putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
@@ -369,7 +387,6 @@ public class UserControllerTest {
 
     @Test
     public void editUser_WithBlankFirstName_ReturnBadRequestAndError() throws Exception {
-        Long id = 1L;
         userRequestDto.setFirstName("");
         String errorMsg = "firstName length should be between 1 and 50";
         putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
@@ -377,7 +394,6 @@ public class UserControllerTest {
 
     @Test
     public void editUser_WithTooLongFirstName_ReturnBadRequestAndError() throws Exception {
-        Long id = 1L;
         userRequestDto.setFirstName(RANDOM_51_STRING);
         String errorMsg = "firstName length should be between 1 and 50";
         putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
@@ -385,7 +401,6 @@ public class UserControllerTest {
 
     @Test
     public void editUser_WithoutLastName_ReturnBadRequestAndError() throws Exception {
-        Long id = 1L;
         userRequestDto.setLastName(null);
         String errorMsg = "lastName is required";
         putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
@@ -393,7 +408,6 @@ public class UserControllerTest {
 
     @Test
     public void editUser_WithBlankLastName_ReturnBadRequestAndError() throws Exception {
-        Long id = 1L;
         userRequestDto.setLastName("");
         String errorMsg = "lastName length should be between 1 and 50";
         putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
@@ -401,7 +415,6 @@ public class UserControllerTest {
 
     @Test
     public void editUser_WithTooLongLastName_ReturnBadRequestAndError() throws Exception {
-        Long id = 1L;
         userRequestDto.setLastName(RANDOM_51_STRING);
         String errorMsg = "lastName length should be between 1 and 50";
         putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
@@ -409,7 +422,6 @@ public class UserControllerTest {
 
     @Test
     public void editUser_WithoutBirthDate_ReturnBadRequestAndError() throws Exception {
-        Long id = 1L;
         userRequestDto.setDateOfBirth(null);
         String errorMsg = "dateOfBirth is required";
         putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
@@ -417,7 +429,6 @@ public class UserControllerTest {
 
     @Test
     public void editUser_WithWrongDateFormat_ReturnBadRequestAndError() throws Exception {
-        Long id = 1L;
         JSONObject json = new JSONObject(objectMapper.writeValueAsString(userRequestDto));
         json.put("dateOfBirth", "2019-12-19");
         String errorMsg = "Incorrect date format of dateOfBirth. Valid pattern is dd-MM-yyyy";
@@ -426,7 +437,6 @@ public class UserControllerTest {
 
     @Test
     public void editUser_WithoutEmail_ReturnBadRequestAndError() throws Exception {
-        Long id = 1L;
         userRequestDto.setEmail(null);
         String errorMsg = "email is required";
         putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
@@ -434,7 +444,6 @@ public class UserControllerTest {
 
     @Test
     public void editUser_WithWrongEmailFormat_ReturnBadRequestAndError() throws Exception {
-        Long id = 1L;
         JSONObject json = new JSONObject(objectMapper.writeValueAsString(userRequestDto));
         json.put("email", "#fr@gr@.com");
         String errorMsg = "email string has to be a well-formed email address";
@@ -443,9 +452,29 @@ public class UserControllerTest {
 
     @Test
     public void editUser_WithoutNotificationProp_ReturnBadRequestAndError() throws Exception {
-        Long id = 1L;
         userRequestDto.setReceiveNotifications(null);
         String errorMsg = "receiveNotifications is required";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void editUser_WithoutPassword_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setPassword(null);
+        String errorMsg = "password is required";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void editUser_WithTooSmallPassword_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setPassword("1234567");
+        String errorMsg = "password length should be between 8 and 50";
+        putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
+    }
+
+    @Test
+    public void editUser_WithTooLongPassword_ReturnBadRequestAndError() throws Exception {
+        userRequestDto.setPassword(RANDOM_51_STRING);
+        String errorMsg = "password length should be between 8 and 50";
         putUserDataAndExpectBadRequestErrorWithSingleMsg(objectMapper.writeValueAsString(userRequestDto), errorMsg);
     }
 
