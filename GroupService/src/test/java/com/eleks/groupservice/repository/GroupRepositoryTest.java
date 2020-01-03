@@ -2,6 +2,7 @@ package com.eleks.groupservice.repository;
 
 import com.eleks.groupservice.domain.Currency;
 import com.eleks.groupservice.domain.Group;
+import com.eleks.groupservice.domain.Payment;
 import com.google.common.collect.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -106,5 +107,17 @@ class GroupRepositoryTest {
     @Test
     void deleteById_DeleteNonExistingGroup_ShouldThrowEmptyResultDataAccessException() {
         assertThrows(EmptyResultDataAccessException.class, () -> repository.deleteById(1L));
+    }
+
+    @Test
+    @Sql(scripts = "classpath:scripts/insert_test_group_and_two_payments.sql")
+    void deleteById_DeleteExistingGroup_ShouldDeleteTwoPayments() {
+        repository.deleteById(1L);
+
+        Payment payment1 = entityManager.find(Payment.class, 1L);
+        Payment payment2 = entityManager.find(Payment.class, 2L);
+
+        assertNull(payment1);
+        assertNull(payment2);
     }
 }
