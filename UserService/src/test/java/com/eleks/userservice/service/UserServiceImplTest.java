@@ -9,6 +9,11 @@ import com.eleks.userservice.exception.UniqueUserPropertiesViolationException;
 import com.eleks.userservice.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -18,22 +23,29 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
-    private UserServiceImpl service;
+    @Mock
     private UserRepository repository;
+
+    @Mock
+    private PasswordEncoder encoder;
+
+    @InjectMocks
+    private UserServiceImpl service;
+
     private User user;
     private UserRequestDto userRequestDto;
 
     @BeforeEach
     void setUp() {
-        repository = mock(UserRepository.class);
-        service = new UserServiceImpl(repository);
-
         userRequestDto = UserRequestDto.builder()
                 .username("username")
+                .password("decoded_password")
                 .firstName("firstName")
                 .lastName("lastName")
                 .dateOfBirth(LocalDate.now())
@@ -44,6 +56,7 @@ class UserServiceImplTest {
         user = User.builder()
                 .id(1L)
                 .username(userRequestDto.getUsername())
+                .password(userRequestDto.getPassword())
                 .firstName(userRequestDto.getFirstName())
                 .lastName(userRequestDto.getLastName())
                 .dateOfBirth(userRequestDto.getDateOfBirth())
@@ -97,6 +110,7 @@ class UserServiceImplTest {
         when(repository.save(any(User.class))).thenReturn(user);
         when(repository.findByUsername(anyString())).thenReturn(Optional.empty());
         when(repository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(encoder.encode(anyString())).thenReturn("encoded_password");
 
         UserResponseDto responseDto = service.saveUser(userRequestDto);
 

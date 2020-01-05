@@ -34,6 +34,7 @@ class UserRepositoryTest {
     void setUp() {
         user = User.builder()
                 .username("username")
+                .password("Passw0rd")
                 .firstName("firstName")
                 .lastName("lastName")
                 .dateOfBirth(LocalDate.now())

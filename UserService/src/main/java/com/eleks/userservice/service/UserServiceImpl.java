@@ -8,7 +8,8 @@ import com.eleks.userservice.exception.ResourceNotFoundException;
 import com.eleks.userservice.exception.UniqueUserPropertiesViolationException;
 import com.eleks.userservice.mapper.UserMapper;
 import com.eleks.userservice.repository.UserRepository;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,10 +17,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository repository;
+    private UserRepository repository;
+    private PasswordEncoder encoder;
+
+    @Autowired
+    public UserServiceImpl(UserRepository repository, PasswordEncoder encoder) {
+        this.repository = repository;
+        this.encoder = encoder;
+    }
 
     @Override
     public Optional<UserResponseDto> getUser(Long id) {
@@ -42,6 +49,9 @@ public class UserServiceImpl implements UserService {
             throw new UniqueUserPropertiesViolationException("user with this email already exists");
         } else {
             User entity = UserMapper.toEntity(user);
+
+            entity.setPassword(encoder.encode(entity.getPassword()));
+
             User savedEntity = repository.save(entity);
             return UserMapper.toDto(savedEntity);
         }

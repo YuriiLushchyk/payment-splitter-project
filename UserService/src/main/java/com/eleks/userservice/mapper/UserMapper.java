@@ -14,6 +14,7 @@ public class UserMapper {
         } else {
             return User.builder()
                     .username(dto.getUsername())
+                    .password(dto.getPassword())
                     .lastName(dto.getLastName())
                     .firstName(dto.getFirstName())
                     .email(dto.getEmail())
