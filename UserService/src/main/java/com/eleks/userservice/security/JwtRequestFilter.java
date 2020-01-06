@@ -40,11 +40,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         String requestTokenHeader = request.getHeader(AUTH_HEADER);
         String jwtToken = getTokenFromHeader(requestTokenHeader);
-        String username = getUsernameFromJwtToken(jwtToken);
+        Long userId = getUserIdFromJwtToken(jwtToken);
 
-        if (username != null) {
+        if (userId != null) {
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    username, null, Collections.emptyList());
+                    userId, null, Collections.emptyList());
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
@@ -60,9 +60,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
     }
 
-    private String getUsernameFromJwtToken(String jwtToken) {
+    private Long getUserIdFromJwtToken(String jwtToken) {
         try {
-            return jwtTokenUtil.getUsernameFromToken(jwtToken);
+            return jwtTokenUtil.getUserIdFromToken(jwtToken);
         } catch (ExpiredJwtException exception) {
             log.warn("Request to parse expired JWT : {} failed : {}", jwtToken, exception.getMessage());
         } catch (UnsupportedJwtException exception) {

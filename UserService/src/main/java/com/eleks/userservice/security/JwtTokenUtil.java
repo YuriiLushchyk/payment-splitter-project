@@ -1,6 +1,5 @@
 package com.eleks.userservice.security;
 
-import com.eleks.userservice.domain.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -23,8 +22,8 @@ public class JwtTokenUtil implements Serializable {
         this.secret = secret;
     }
 
-    public String getUsernameFromToken(String token) {
-        return getClaimFromToken(token, Claims::getSubject);
+    public Long getUserIdFromToken(String token) {
+        return Long.valueOf(getClaimFromToken(token, Claims::getSubject));
     }
 
     public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
@@ -32,9 +31,9 @@ public class JwtTokenUtil implements Serializable {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(User user) {
+    public String generateToken(Long userId) {
         Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, user.getUsername());
+        return doGenerateToken(claims, userId.toString());
     }
 
     private String doGenerateToken(Map<String, Object> claims, String subject) {
