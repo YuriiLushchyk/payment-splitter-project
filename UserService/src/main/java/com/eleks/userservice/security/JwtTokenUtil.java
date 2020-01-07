@@ -14,7 +14,7 @@ import java.util.function.Function;
 
 @Component
 public class JwtTokenUtil implements Serializable {
-    public static final long JWT_TOKEN_VALIDITY = 60 * 60 * 1000;
+    public static final long JWT_VALIDITY_TIME_MILLIS = 60 * 60 * 1000;
 
     private String secret;
 
@@ -33,15 +33,15 @@ public class JwtTokenUtil implements Serializable {
 
     public String generateToken(Long userId) {
         Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, userId.toString());
+        return doGenerateToken(claims, userId.toString(), JWT_VALIDITY_TIME_MILLIS);
     }
 
-    private String doGenerateToken(Map<String, Object> claims, String subject) {
+    public String doGenerateToken(Map<String, Object> claims, String subject, long validityTimeMillis) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
+                .setExpiration(new Date(System.currentTimeMillis() + validityTimeMillis))
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
     }
