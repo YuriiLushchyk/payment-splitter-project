@@ -1,5 +1,8 @@
 package com.eleks.common.security.model;
 
+import lombok.Getter;
+
+@Getter
 public class LoggedInUserPrincipal extends JwtUserDataClaim {
     private String jwt;
 

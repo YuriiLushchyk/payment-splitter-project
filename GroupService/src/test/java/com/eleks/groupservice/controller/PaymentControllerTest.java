@@ -1,7 +1,7 @@
 package com.eleks.groupservice.controller;
 
+import com.eleks.common.dto.ErrorDto;
 import com.eleks.groupservice.advisor.ResponseExceptionHandler;
-import com.eleks.groupservice.dto.ErrorDto;
 import com.eleks.groupservice.dto.payment.PaymentRequestDto;
 import com.eleks.groupservice.dto.payment.PaymentResponseDto;
 import com.eleks.groupservice.exception.ResourceNotFoundException;

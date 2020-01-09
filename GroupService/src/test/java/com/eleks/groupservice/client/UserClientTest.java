@@ -1,5 +1,7 @@
 package com.eleks.groupservice.client;
 
+import com.eleks.common.security.SecurityPrincipalHolder;
+import com.eleks.common.security.model.LoggedInUserPrincipal;
 import com.eleks.groupservice.dto.userclient.UserDto;
 import com.eleks.groupservice.dto.userclient.UserSearchDto;
 import com.eleks.groupservice.exception.UserServiceException;
@@ -8,16 +10,22 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.google.common.collect.Sets;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 
 import java.util.List;
 import java.util.Set;
 
+import static com.eleks.common.security.SecurityConstants.BEARER_TOKEN_PREFIX;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
 @SpringBootTest
 class UserClientTest {
@@ -32,14 +40,25 @@ class UserClientTest {
     @Autowired
     ObjectMapper objectMapper;
 
+    @MockBean
+    SecurityPrincipalHolder securityPrincipalHolder;
+
+    LoggedInUserPrincipal fakePrincipal;
+
     @BeforeAll
-    static void setUp() {
+    static void setUpAll() {
         wm.start();
         userIds = Sets.newHashSet(1L, 2L, 3L);
     }
 
+    @BeforeEach
+    void setUpEach() {
+        fakePrincipal = new LoggedInUserPrincipal("testUser", 1L, "fake_token");
+        when(securityPrincipalHolder.getPrincipal()).thenReturn(fakePrincipal);
+    }
+
     @AfterAll
-    static void cleanUp() {
+    static void cleanUpAll() {
         wm.stop();
     }
 
@@ -159,7 +178,8 @@ class UserClientTest {
 
     private void verifyPostOnSearchWithRequestDto(UserSearchDto dto) throws Exception {
         wm.verify((postRequestedFor(urlEqualTo("/users/search"))
-                .withHeader("Content-Type", equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(AUTHORIZATION, equalTo(BEARER_TOKEN_PREFIX + fakePrincipal.getJwt()))
                 .withRequestBody(equalToJson(objectMapper.writeValueAsString(dto)))));
     }
 }

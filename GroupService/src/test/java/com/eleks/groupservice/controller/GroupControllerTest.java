@@ -1,8 +1,8 @@
 package com.eleks.groupservice.controller;
 
+import com.eleks.common.dto.ErrorDto;
 import com.eleks.groupservice.advisor.ResponseExceptionHandler;
 import com.eleks.groupservice.domain.Currency;
-import com.eleks.groupservice.dto.ErrorDto;
 import com.eleks.groupservice.dto.UserStatusDto;
 import com.eleks.groupservice.dto.group.GroupRequestDto;
 import com.eleks.groupservice.dto.group.GroupResponseDto;

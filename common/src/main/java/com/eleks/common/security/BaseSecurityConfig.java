@@ -13,10 +13,12 @@ public class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private ObjectMapper objectMapper;
     private JwtTokenUtil jwtTokenUtil;
+    private SecurityPrincipalHolder principalHolder;
 
-    public BaseSecurityConfig(ObjectMapper objectMapper, JwtTokenUtil jwtTokenUtil) {
+    public BaseSecurityConfig(ObjectMapper objectMapper, JwtTokenUtil jwtTokenUtil, SecurityPrincipalHolder principalHolder) {
         this.objectMapper = objectMapper;
         this.jwtTokenUtil = jwtTokenUtil;
+        this.principalHolder = principalHolder;
     }
 
     @Override
@@ -28,7 +30,7 @@ public class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilterBefore(new AuthRequestFilter(jwtTokenUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new AuthRequestFilter(jwtTokenUtil, principalHolder), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override

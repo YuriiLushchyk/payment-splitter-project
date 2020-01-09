@@ -8,10 +8,6 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -27,10 +23,11 @@ import static com.eleks.common.security.SecurityConstants.BEARER_TOKEN_PREFIX;
 public class AuthRequestFilter extends OncePerRequestFilter {
 
     private JwtTokenUtil jwtTokenUtil;
+    private SecurityPrincipalHolder principalHolder;
 
-    @Autowired
-    public AuthRequestFilter(JwtTokenUtil jwtTokenUtil) {
+    public AuthRequestFilter(JwtTokenUtil jwtTokenUtil, SecurityPrincipalHolder principalHolder) {
         this.jwtTokenUtil = jwtTokenUtil;
+        this.principalHolder = principalHolder;
     }
 
     @Override
@@ -42,8 +39,7 @@ public class AuthRequestFilter extends OncePerRequestFilter {
 
         if (userClaim != null) {
             LoggedInUserPrincipal principal = new LoggedInUserPrincipal(userClaim.getUsername(), userClaim.getUserId(), jwtToken);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(principal, null, null);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            principalHolder.setPrincipal(principal);
         }
 
         chain.doFilter(request, response);

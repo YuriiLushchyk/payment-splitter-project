@@ -1,6 +1,6 @@
 package com.eleks.groupservice.advisor;
 
-import com.eleks.groupservice.dto.ErrorDto;
+import com.eleks.common.dto.ErrorDto;
 import com.eleks.groupservice.exception.ResourceNotFoundException;
 import com.eleks.groupservice.exception.UserServiceException;
 import com.eleks.groupservice.exception.UsersIdsValidationException;
