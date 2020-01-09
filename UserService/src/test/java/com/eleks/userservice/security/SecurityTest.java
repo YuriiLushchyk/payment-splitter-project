@@ -5,6 +5,7 @@ import com.eleks.userservice.dto.login.JwtResponse;
 import com.eleks.userservice.dto.login.LoginRequest;
 import com.eleks.userservice.dto.user.UserRequestDto;
 import com.eleks.userservice.dto.user.UserResponseDto;
+import com.eleks.userservice.security.model.JwtUserDataClaim;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 
 import static com.eleks.userservice.security.SecurityConstants.AUTH_HEADER;
 import static com.eleks.userservice.security.SecurityConstants.BEARER_TOKEN_PREFIX;
@@ -108,7 +108,8 @@ public class SecurityTest {
 
     @Test
     void getUser_WithExpiredJWT_ShouldReturnUnAuthorizedError() throws Exception {
-        String expiredJwt = jwtTokenUtil.doGenerateToken(new HashMap<>(), "1", 0);
+        String subject = objectMapper.writeValueAsString(new JwtUserDataClaim("testUser", 1L));
+        String expiredJwt = jwtTokenUtil.doGenerateToken(subject, 0);
 
         String responseBody = mockMvc.perform(get("/users/1")
                 .header(AUTH_HEADER, BEARER_TOKEN_PREFIX + expiredJwt))
@@ -141,7 +142,7 @@ public class SecurityTest {
     @Test
     @Sql(scripts = "classpath:scripts/insert_test_user.sql")
     void getUser_WithValidJWT_ShouldReturnOkAndUser() throws Exception {
-        String jwt = jwtTokenUtil.generateToken(1L);
+        String jwt = jwtTokenUtil.generateToken(new JwtUserDataClaim("testUser", 1L));
 
         String responseBody = mockMvc.perform(get("/users/1")
                 .header(AUTH_HEADER, BEARER_TOKEN_PREFIX + jwt))

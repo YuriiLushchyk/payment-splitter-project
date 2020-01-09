@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -44,6 +45,14 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         log.info("handleBadUserDataException, " + exception.getMessage());
         String msg = exception.getMessage() == null ? "User data is incorrect" : exception.getMessage();
         return createError(HttpStatus.BAD_REQUEST, Collections.singletonList(msg));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    public ErrorDto handleBadCredentialsException(BadCredentialsException exception) {
+        log.info("handleBadCredentialsException, " + exception.getMessage());
+        return createError(HttpStatus.UNAUTHORIZED, Collections.singletonList(exception.getMessage()));
     }
 
     @Override

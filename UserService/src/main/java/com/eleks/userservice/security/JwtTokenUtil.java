@@ -1,44 +1,41 @@
 package com.eleks.userservice.security;
 
-import io.jsonwebtoken.Claims;
+import com.eleks.userservice.security.model.JwtUserDataClaim;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 
 @Component
+@Slf4j
 public class JwtTokenUtil implements Serializable {
     public static final long JWT_VALIDITY_TIME_MILLIS = 60 * 60 * 1000;
 
     private String secret;
+    private ObjectMapper objectMapper;
 
-    public JwtTokenUtil(@Value("${jwt.secret}") String secret) {
+    public JwtTokenUtil(@Value("${jwt.secret}") String secret, ObjectMapper objectMapper) {
         this.secret = secret;
+        this.objectMapper = objectMapper;
     }
 
-    public Long getUserIdFromToken(String token) {
-        return Long.valueOf(getClaimFromToken(token, Claims::getSubject));
+    public JwtUserDataClaim getUserFromToken(String token) throws IOException {
+        String rawData = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
+        return objectMapper.readValue(rawData, JwtUserDataClaim.class);
     }
 
-    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
-        return claimsResolver.apply(claims);
+    public String generateToken(JwtUserDataClaim userDataClaim) throws IOException {
+        return doGenerateToken(objectMapper.writeValueAsString(userDataClaim), JWT_VALIDITY_TIME_MILLIS);
     }
 
-    public String generateToken(Long userId) {
-        Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, userId.toString(), JWT_VALIDITY_TIME_MILLIS);
-    }
-
-    public String doGenerateToken(Map<String, Object> claims, String subject, long validityTimeMillis) {
+    public String doGenerateToken(String subject, long validityTimeMillis) {
         return Jwts.builder()
-                .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + validityTimeMillis))

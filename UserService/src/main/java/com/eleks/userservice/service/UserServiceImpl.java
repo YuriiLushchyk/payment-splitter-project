@@ -9,7 +9,6 @@ import com.eleks.userservice.exception.UniqueUserPropertiesViolationException;
 import com.eleks.userservice.mapper.UserMapper;
 import com.eleks.userservice.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -82,18 +81,6 @@ public class UserServiceImpl implements UserService {
             repository.deleteById(id);
         } else {
             throw new ResourceNotFoundException("user with this id does't exist");
-        }
-    }
-
-    @Override
-    public User getUserByUsernameAndPassword(String username, String password) throws BadCredentialsException {
-        BadCredentialsException error = new BadCredentialsException("Invalid credential");
-        User user = repository.findByUsername(username).orElseThrow(() -> error);
-
-        if (encoder.matches(password, user.getPassword())) {
-            return user;
-        } else {
-            throw error;
         }
     }
 }
