@@ -1,5 +1,7 @@
-package com.eleks.userservice.security;
+package com.eleks.userservice.configuration;
 
+import com.eleks.common.security.BaseSecurityConfig;
+import com.eleks.common.security.JwtTokenUtil;
 import com.eleks.userservice.service.CustomUserDetailsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;

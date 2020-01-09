@@ -1,7 +1,7 @@
 package com.eleks.userservice.controller;
 
+import com.eleks.common.dto.ErrorDto;
 import com.eleks.userservice.advisor.ResponseExceptionHandler;
-import com.eleks.userservice.dto.ErrorDto;
 import com.eleks.userservice.dto.UserSearchDto;
 import com.eleks.userservice.dto.user.UserRequestDto;
 import com.eleks.userservice.dto.user.UserResponseDto;
@@ -9,14 +9,12 @@ import com.eleks.userservice.exception.ResourceNotFoundException;
 import com.eleks.userservice.exception.UniqueUserPropertiesViolationException;
 import com.eleks.userservice.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static com.eleks.userservice.security.SecurityConstants.SECURITY_PACKAGE_PATTERN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.*;
@@ -37,18 +34,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
-@WebMvcTest(value = UserController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.REGEX, pattern = SECURITY_PACKAGE_PATTERN))
+@ExtendWith(MockitoExtension.class)
 public class UserControllerTest {
 
     private MockMvc mockMvc;
 
-    @MockBean
     private UserService service;
 
-    @Autowired
-    private UserController controller;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
     private UserRequestDto userRequestDto;
@@ -57,6 +49,12 @@ public class UserControllerTest {
 
     @BeforeEach
     public void setUp() {
+        objectMapper = getObjectMapper();
+
+        service = mock(UserService.class);
+
+        UserController controller = new UserController(service);
+
         mockMvc = standaloneSetup(controller)
                 .setControllerAdvice(new ResponseExceptionHandler())
                 .build();
@@ -80,6 +78,12 @@ public class UserControllerTest {
                 .email(userRequestDto.getEmail())
                 .receiveNotifications(userRequestDto.getReceiveNotifications())
                 .build();
+    }
+
+    private ObjectMapper getObjectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper;
     }
 
     @Test

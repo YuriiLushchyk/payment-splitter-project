@@ -1,11 +1,11 @@
 package com.eleks.userservice.controller;
 
 
+import com.eleks.common.security.JwtTokenUtil;
+import com.eleks.common.security.model.JwtUserDataClaim;
 import com.eleks.userservice.dto.CustomUserDetails;
 import com.eleks.userservice.dto.login.JwtResponse;
 import com.eleks.userservice.dto.login.LoginRequest;
-import com.eleks.userservice.security.JwtTokenUtil;
-import com.eleks.userservice.security.model.JwtUserDataClaim;
 import com.eleks.userservice.service.CustomUserDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

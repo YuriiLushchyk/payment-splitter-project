@@ -1,6 +1,6 @@
-package com.eleks.userservice.security;
+package com.eleks.common.security;
 
-import com.eleks.userservice.security.model.JwtUserDataClaim;
+import com.eleks.common.security.model.JwtUserDataClaim;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

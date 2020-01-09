@@ -2,3 +2,4 @@ rootProject.name = 'payment-splitter'
 
 include 'UserService'
 include 'GroupService'
+include 'common'

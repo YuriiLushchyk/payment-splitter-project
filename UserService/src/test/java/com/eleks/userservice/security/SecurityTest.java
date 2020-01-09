@@ -1,11 +1,12 @@
 package com.eleks.userservice.security;
 
-import com.eleks.userservice.dto.ErrorDto;
+import com.eleks.common.dto.ErrorDto;
+import com.eleks.common.security.JwtTokenUtil;
+import com.eleks.common.security.model.JwtUserDataClaim;
 import com.eleks.userservice.dto.login.JwtResponse;
 import com.eleks.userservice.dto.login.LoginRequest;
 import com.eleks.userservice.dto.user.UserRequestDto;
 import com.eleks.userservice.dto.user.UserResponseDto;
-import com.eleks.userservice.security.model.JwtUserDataClaim;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,8 +20,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDate;
 
-import static com.eleks.userservice.security.SecurityConstants.AUTH_HEADER;
-import static com.eleks.userservice.security.SecurityConstants.BEARER_TOKEN_PREFIX;
+import static com.eleks.common.security.SecurityConstants.AUTH_HEADER;
+import static com.eleks.common.security.SecurityConstants.BEARER_TOKEN_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;

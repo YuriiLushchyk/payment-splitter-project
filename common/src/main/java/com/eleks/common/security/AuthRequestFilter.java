@@ -1,8 +1,8 @@
-package com.eleks.userservice.security;
+package com.eleks.common.security;
 
 
-import com.eleks.userservice.security.model.JwtUserDataClaim;
-import com.eleks.userservice.security.model.LoggedInUserPrincipal;
+import com.eleks.common.security.model.JwtUserDataClaim;
+import com.eleks.common.security.model.LoggedInUserPrincipal;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
@@ -20,16 +20,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static com.eleks.userservice.security.SecurityConstants.AUTH_HEADER;
-import static com.eleks.userservice.security.SecurityConstants.BEARER_TOKEN_PREFIX;
+import static com.eleks.common.security.SecurityConstants.AUTH_HEADER;
+import static com.eleks.common.security.SecurityConstants.BEARER_TOKEN_PREFIX;
 
 @Slf4j
-public class JwtRequestFilter extends OncePerRequestFilter {
+public class AuthRequestFilter extends OncePerRequestFilter {
 
     private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    public JwtRequestFilter(JwtTokenUtil jwtTokenUtil) {
+    public AuthRequestFilter(JwtTokenUtil jwtTokenUtil) {
         this.jwtTokenUtil = jwtTokenUtil;
     }
 

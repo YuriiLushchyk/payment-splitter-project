@@ -1,4 +1,4 @@
-package com.eleks.userservice.security.model;
+package com.eleks.common.security.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.eleks.userservice.dto;
+package com.eleks.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;

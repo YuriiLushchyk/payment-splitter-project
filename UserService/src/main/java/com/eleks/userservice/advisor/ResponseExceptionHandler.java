@@ -1,6 +1,6 @@
 package com.eleks.userservice.advisor;
 
-import com.eleks.userservice.dto.ErrorDto;
+import com.eleks.common.dto.ErrorDto;
 import com.eleks.userservice.exception.InvalidDateFormatException;
 import com.eleks.userservice.exception.ResourceNotFoundException;
 import com.eleks.userservice.exception.UniqueUserPropertiesViolationException;

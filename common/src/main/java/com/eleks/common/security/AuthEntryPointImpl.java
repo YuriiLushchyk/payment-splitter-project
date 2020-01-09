@@ -1,7 +1,7 @@
-package com.eleks.userservice.security;
+package com.eleks.common.security;
 
 
-import com.eleks.userservice.dto.ErrorDto;
+import com.eleks.common.dto.ErrorDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,11 +14,11 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
-public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
+public class AuthEntryPointImpl implements AuthenticationEntryPoint {
 
     private ObjectMapper objectMapper;
 
-    public AuthenticationEntryPointImpl(ObjectMapper objectMapper) {
+    public AuthEntryPointImpl(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 

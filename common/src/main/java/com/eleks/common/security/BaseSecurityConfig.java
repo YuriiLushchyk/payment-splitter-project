@@ -1,4 +1,4 @@
-package com.eleks.userservice.security;
+package com.eleks.common.security;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,11 +24,11 @@ public class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity.csrf().disable()
                 .authorizeRequests().anyRequest().authenticated()
                 .and()
-                .exceptionHandling().authenticationEntryPoint(new AuthenticationEntryPointImpl(objectMapper))
+                .exceptionHandling().authenticationEntryPoint(new AuthEntryPointImpl(objectMapper))
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilterBefore(new JwtRequestFilter(jwtTokenUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new AuthRequestFilter(jwtTokenUtil), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override
