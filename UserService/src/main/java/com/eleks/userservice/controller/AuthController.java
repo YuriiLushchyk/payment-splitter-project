@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.io.IOException;
 
 @RestController
@@ -35,7 +36,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/login")
-    public JwtResponse createAuthenticationToken(@RequestBody LoginRequest request) throws IOException, BadCredentialsException {
+    public JwtResponse login(@Valid @RequestBody LoginRequest request) throws IOException, BadCredentialsException {
         authenticate(request.getUsername(), request.getPassword());
 
         CustomUserDetails details = service.loadUserByUsername(request.getUsername());
