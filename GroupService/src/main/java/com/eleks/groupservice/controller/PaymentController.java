@@ -1,5 +1,6 @@
 package com.eleks.groupservice.controller;
 
+import com.eleks.common.security.SecurityPrincipalHolder;
 import com.eleks.groupservice.dto.payment.PaymentRequestDto;
 import com.eleks.groupservice.dto.payment.PaymentResponseDto;
 import com.eleks.groupservice.exception.ResourceNotFoundException;
@@ -12,18 +13,19 @@ import java.util.List;
 
 @RestController
 public class PaymentController {
-    public static final Long TEST_USER_ID = 1L;
-
     private PaymentService service;
+    private SecurityPrincipalHolder principalHolder;
 
     @Autowired
-    public PaymentController(PaymentService service) {
+    public PaymentController(PaymentService service, SecurityPrincipalHolder principalHolder) {
         this.service = service;
+        this.principalHolder = principalHolder;
     }
 
     @PostMapping("/groups/{groupId}/payments")
     public PaymentResponseDto createPayment(@PathVariable Long groupId, @Valid @RequestBody PaymentRequestDto requestDto) {
-        return service.createPayment(groupId, TEST_USER_ID, requestDto);
+        Long loggedUserId = principalHolder.getPrincipal().getUserId();
+        return service.createPayment(groupId, loggedUserId, requestDto);
     }
 
     @GetMapping("/groups/{groupId}/payments/{paymentId}")

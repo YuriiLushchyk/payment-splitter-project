@@ -1,6 +1,8 @@
 package com.eleks.groupservice.controller;
 
 import com.eleks.common.dto.ErrorDto;
+import com.eleks.common.security.SecurityPrincipalHolder;
+import com.eleks.common.security.model.LoggedInUserPrincipal;
 import com.eleks.groupservice.advisor.ResponseExceptionHandler;
 import com.eleks.groupservice.dto.payment.PaymentRequestDto;
 import com.eleks.groupservice.dto.payment.PaymentResponseDto;
@@ -47,14 +49,20 @@ class PaymentControllerTest {
     @MockBean
     PaymentService service;
 
+    @MockBean
+    SecurityPrincipalHolder principalHolder;
+
     private PaymentRequestDto requestDto;
     private PaymentResponseDto responseDto;
+    private LoggedInUserPrincipal principal;
 
     @BeforeEach
     void setUp() {
         mockMvc = standaloneSetup(controller)
                 .setControllerAdvice(new ResponseExceptionHandler())
                 .build();
+
+        principal = new LoggedInUserPrincipal("testUser", 1L, "jwt_token");
 
         requestDto = PaymentRequestDto.builder()
                 .paymentDescription("paymentDescription")
@@ -67,7 +75,7 @@ class PaymentControllerTest {
                 .paymentDescription(requestDto.getPaymentDescription())
                 .price(requestDto.getPrice())
                 .coPayers(requestDto.getCoPayers())
-                .creatorId(1L)
+                .creatorId(principal.getUserId())
                 .groupId(1L)
                 .timestamp(Instant.now())
                 .build();
@@ -77,6 +85,7 @@ class PaymentControllerTest {
     @Test
     void createPayment_AllDataIsSet_ReturnOkAndSavedPayment() throws Exception {
         when(service.createPayment(anyLong(), anyLong(), any(PaymentRequestDto.class))).thenReturn(responseDto);
+        when(principalHolder.getPrincipal()).thenReturn(principal);
 
         mockMvc.perform(post("/groups/1/payments")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -154,6 +163,7 @@ class PaymentControllerTest {
         UsersIdsValidationException error = new UsersIdsValidationException("msg");
 
         when(service.createPayment(anyLong(), anyLong(), any(PaymentRequestDto.class))).thenThrow(error);
+        when(principalHolder.getPrincipal()).thenReturn(principal);
 
         postPaymentAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
                 400,
@@ -165,6 +175,7 @@ class PaymentControllerTest {
         ResourceNotFoundException error = new ResourceNotFoundException("msg");
 
         when(service.createPayment(anyLong(), anyLong(), any(PaymentRequestDto.class))).thenThrow(error);
+        when(principalHolder.getPrincipal()).thenReturn(principal);
 
         postPaymentAndExpectStatusAndErrorWithMessage(objectMapper.writeValueAsString(requestDto),
                 404,
