@@ -2,12 +2,16 @@ package com.eleks.common.security;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.util.Pair;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.util.Collections;
+import java.util.List;
 
 public class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -35,9 +39,14 @@ public class BaseSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring()
-                .antMatchers(HttpMethod.POST, "/login", "/users")
-                .antMatchers(SWAGGER_WHITELIST);
+        web.ignoring().antMatchers(SWAGGER_WHITELIST);
+        for (Pair<HttpMethod, List<String>> endpoint : getEndpointsToIgnore()) {
+            web.ignoring().antMatchers(endpoint.getKey(), endpoint.getValue().toArray(new String[0]));
+        }
+    }
+
+    protected List<Pair<HttpMethod, List<String>>> getEndpointsToIgnore() {
+        return Collections.emptyList();
     }
 
     private static final String[] SWAGGER_WHITELIST = {
