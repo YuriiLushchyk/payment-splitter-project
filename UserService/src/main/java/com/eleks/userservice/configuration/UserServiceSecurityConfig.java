@@ -5,7 +5,6 @@ import com.eleks.common.security.JwtTokenUtil;
 import com.eleks.common.security.SecurityPrincipalHolder;
 import com.eleks.userservice.service.CustomUserDetailsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javafx.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -17,9 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Configuration
 @EnableWebSecurity
@@ -51,8 +48,8 @@ public class UserServiceSecurityConfig extends BaseSecurityConfig {
     }
 
     @Override
-    protected List<Pair<HttpMethod, List<String>>> getEndpointsToIgnore() {
-        Pair<HttpMethod, List<String>> endpoints = new Pair<>(HttpMethod.POST, Arrays.asList("/login", "/users"));
+    protected List<Map.Entry<HttpMethod, List<String>>> getEndpointsToIgnore() {
+        Map.Entry<HttpMethod, List<String>> endpoints = new AbstractMap.SimpleEntry<>(HttpMethod.POST, Arrays.asList("/login", "/users"));
         return Collections.singletonList(endpoints);
     }
 }
