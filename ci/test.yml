@@ -6,7 +6,7 @@ image_resource:
   source: {repository: java, tag: openjdk-8}
 
 inputs:
-  - name: resource-source
+  - name: git-resource
 
 run:
-  path: resource-source/ci/test_script.sh
+  path: git-resource/ci/test_script.sh

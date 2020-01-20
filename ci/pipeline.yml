@@ -1,6 +1,6 @@
 ---
 resources:
-  - name: resource-source
+  - name: git-resource
     type: git
     source:
       uri: https://github.com/YuriiLushchyk/payment-splitter-project.git
@@ -10,6 +10,6 @@ jobs:
   - name: job-test
     public: true
     plan:
-      - get: resource-source
+      - get: git-resource
       - task: run-tests
-        file: resource-source/ci/test.yml
+        file: git-resource/ci/test.yml

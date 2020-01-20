@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cd resource-source
+cd git-resource
 ./gradlew --no-daemon clean test
