@@ -1,0 +1,16 @@
+---
+resources:
+  - name: resource-source
+    type: git
+    source:
+      uri: git@github.com:YuriiLushchyk/payment-splitter-project.git
+      branch: master
+      private_key: ((git-ssh-key))
+
+jobs:
+  - name: job-test
+    public: true
+    plan:
+      - get: resource-source
+      - task: run-tests
+        file: resource-source/ci/test.yml
