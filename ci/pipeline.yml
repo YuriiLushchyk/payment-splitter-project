@@ -3,9 +3,8 @@ resources:
   - name: resource-source
     type: git
     source:
-      uri: git@github.com:YuriiLushchyk/payment-splitter-project.git
+      uri: https://github.com/YuriiLushchyk/payment-splitter-project.git
       branch: master
-      private_key: ((git-ssh-key))
 
 jobs:
   - name: job-test
