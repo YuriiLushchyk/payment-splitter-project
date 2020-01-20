@@ -8,5 +8,8 @@ image_resource:
 inputs:
   - name: git-resource
 
+caches:
+  -path: .gradle/
+
 run:
   path: git-resource/ci/test_script.sh

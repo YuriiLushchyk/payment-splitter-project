@@ -1,4 +1,7 @@
 #!/bin/bash
+set -e -u
+export TERM=${TERM:-dumb}
 
-cd git-resource
-./gradlew --no-daemon clean test
+pushd git-resource
+   ./gradlew clean test
+popd
