@@ -8,8 +8,12 @@ image_resource:
 inputs:
   - name: git-resource
 
+outputs:
+  - name: user-service-build
+  - name: analysis-input
+
 caches:
   - path: .gradle/
 
 run:
-  path: git-resource/ci/test_script.sh
+  path: git-resource/ci/userservice/task/test_and_build_script.sh

@@ -2,6 +2,7 @@ plugins {
     id 'org.springframework.boot' version '2.2.2.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'java'
+    id 'maven-publish'
 }
 
 group = 'com.eleks'
@@ -16,6 +17,18 @@ configurations {
 
 repositories {
     mavenCentral()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+jar {
+    dependsOn generatePomFileForMavenJavaPublication
 }
 
 dependencies {

@@ -1,0 +1,7 @@
+---
+applications:
+  - name: UserService
+    instances: 1
+    random-route: true
+    services:
+      - mysql-db

@@ -1,0 +1,78 @@
+---
+resource_types:
+  - name: maven-resource-type
+    type: docker-image
+    source:
+      repository: nulldriver/maven-resource
+      tag: latest
+  - name: sonarqube-resource-type
+    type: docker-image
+    source:
+      repository: cathive/concourse-sonarqube-resource
+      tag: 0.9.1
+
+resources:
+  - name: git-resource
+    type: git
+    source:
+      uri: https://github.com/YuriiLushchyk/payment-splitter-project.git
+      branch: master
+  - name: artifact-resourse
+    type: maven-resource-type
+    source:
+      url: http://172.25.71.203:8081/nexus/content/repositories/releases/
+      snapshot_url: http://172.25.71.203:8081/nexus/content/repositories/snapshots/
+      artifact: com.eleks:UserService:jar
+      username: ((nexus-username))
+      password: ((nexus-password))
+      skip_cert_check: true
+  - name: cf-resourse
+    type: cf
+    source:
+      api: api.run.pivotal.io
+      username: ((cf-username))
+      password: ((cf-password))
+      organization: lushchyk-org
+      space: development
+      skip_cert_check: true
+  - name: code-analysis-resourse
+    type: sonarqube-resource-type
+    source:
+      host_url: http://172.25.71.203:9000/
+      login: ((sonarqube-username))
+      password: ((sonarqube-password))
+
+jobs:
+  - name: test-and-build-job
+    plan:
+      - get: git-resource
+      - task: test-and-build-task
+        file: git-resource/ci/userservice/task/test_and_build_task.yml
+      - in_parallel:
+        - put: artifact-resourse
+          params:
+            file: user-service-build/UserService-*.jar
+            pom_file: user-service-build/pom.xml
+        - put: code-analysis-resourse
+          params:
+            project_path: analysis-input
+  - name: deploy-job
+    plan:
+      - get: git-resource
+        passed: [test-and-build-job]
+      - get: artifact-resourse
+        passed: [test-and-build-job]
+        trigger: true
+      - put: cf-resourse
+        params:
+          manifest: git-resource/ci/userservice/manifest/manifest.yml
+          path: artifact-resourse/UserService-*.jar
+  - name: qualitygate-job
+    plan:
+      - get: git-resource
+        passed: [test-and-build-job]
+      - get: code-analysis-resourse
+        passed: [test-and-build-job]
+        trigger: true
+      - task: check-sonarqube-quality-gate-task
+        file: git-resource/ci/userservice/task/check_sonarqube_quality_gate_task.yml
