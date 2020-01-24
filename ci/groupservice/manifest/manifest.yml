@@ -1,0 +1,9 @@
+---
+applications:
+  - name: GroupService
+    instances: 1
+    random-route: true
+    services:
+      - mysql-db
+    env:
+      userservice.url: http://userservice-happy-shark.cfapps.io

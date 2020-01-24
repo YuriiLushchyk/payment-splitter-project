@@ -22,7 +22,7 @@ resources:
     source:
       url: http://172.25.71.203:8081/nexus/content/repositories/releases/
       snapshot_url: http://172.25.71.203:8081/nexus/content/repositories/snapshots/
-      artifact: com.eleks:UserService:jar
+      artifact: com.eleks:GroupService:jar
       username: ((nexus-username))
       password: ((nexus-password))
       skip_cert_check: true
@@ -47,12 +47,12 @@ jobs:
     plan:
       - get: git-resource
       - task: test-and-build-task
-        file: git-resource/ci/userservice/task/test_and_build_task.yml
+        file: git-resource/ci/groupservice/task/test_and_build_task.yml
       - in_parallel:
         - put: artifact-resourse
           params:
-            file: user-service-build/UserService-*.jar
-            pom_file: user-service-build/pom.xml
+            file: group-service-build/GroupService-*.jar
+            pom_file: group-service-build/pom.xml
         - put: code-analysis-resourse
           params:
             project_path: analysis-input
@@ -65,8 +65,8 @@ jobs:
         trigger: true
       - put: cf-resourse
         params:
-          manifest: git-resource/ci/userservice/manifest/manifest.yml
-          path: artifact-resourse/UserService-*.jar
+          manifest: git-resource/ci/groupservice/manifest/manifest.yml
+          path: artifact-resourse/GroupService-*.jar
   - name: qualitygate-job
     plan:
       - get: git-resource

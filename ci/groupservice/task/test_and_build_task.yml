@@ -1,0 +1,19 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: {repository: java, tag: openjdk-8}
+
+inputs:
+  - name: git-resource
+
+outputs:
+  - name: group-service-build
+  - name: analysis-input
+
+caches:
+  - path: .gradle/
+
+run:
+  path: git-resource/ci/groupservice/task/test_and_build_script.sh
