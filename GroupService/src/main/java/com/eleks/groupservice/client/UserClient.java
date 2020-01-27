@@ -68,9 +68,9 @@ public class UserClient {
     }
 
     private HttpHeaders getHeaders() {
-        return new HttpHeaders() {{
-            LoggedInUserPrincipal principal = principalHolder.getPrincipal();
-            setBearerAuth(principal.getJwt());
-        }};
+        HttpHeaders headers = new HttpHeaders();
+        LoggedInUserPrincipal principal = principalHolder.getPrincipal();
+        headers.setBearerAuth(principal.getJwt());
+        return headers;
     }
 }
