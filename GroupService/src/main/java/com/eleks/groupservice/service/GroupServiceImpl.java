@@ -98,4 +98,13 @@ public class GroupServiceImpl implements GroupService {
                                 .build()
                 ).collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteMemberFromAllGroups(Long userId) {
+        List<Group> groupsWithMember = repository.findAllWithMember(userId);
+        for (Group group : groupsWithMember) {
+            group.getMembers().remove(userId);
+            repository.save(group);
+        }
+    }
 }

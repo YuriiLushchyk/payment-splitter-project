@@ -7,6 +7,7 @@ import com.eleks.userservice.dto.user.UserRequestDto;
 import com.eleks.userservice.dto.user.UserResponseDto;
 import com.eleks.userservice.exception.ResourceNotFoundException;
 import com.eleks.userservice.exception.UniqueUserPropertiesViolationException;
+import com.eleks.userservice.notifications.NotificationSender;
 import com.eleks.userservice.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
@@ -44,13 +45,16 @@ public class UserControllerTest {
 
     private UserResponseDto userResponseDto;
 
+    private NotificationSender notificationSender;
+
     @BeforeEach
     public void setUp() {
         objectMapper = getObjectMapper();
 
         service = mock(UserService.class);
+        notificationSender = mock(NotificationSender.class);
 
-        UserController controller = new UserController(service);
+        UserController controller = new UserController(service, notificationSender);
 
         mockMvc = standaloneSetup(controller)
                 .setControllerAdvice(new ResponseExceptionHandler())
@@ -494,12 +498,13 @@ public class UserControllerTest {
     }
 
     @Test
-    public void deleteUser_UserExists_ReturnOk() throws Exception {
+    public void deleteUser_UserExists_SendDeleteEventWithUserIdAndReturnOk() throws Exception {
         Long id = 1L;
         mockMvc.perform(delete("/users/" + id))
                 .andExpect(status().isOk());
 
         verify(service).deleteUserById(eq(id));
+        verify(notificationSender).sendDeleteUserEvent(id);
     }
 
     @Test

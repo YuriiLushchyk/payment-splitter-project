@@ -15,6 +15,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -119,5 +120,66 @@ class GroupRepositoryTest {
 
         assertNull(payment1);
         assertNull(payment2);
+    }
+
+    @Test
+    @Sql(scripts = "classpath:scripts/insert_test_groups_with_different_members.sql")
+    void findAllWithMember_GroupWithSuchIdExists_ShouldReturnOneGroupWithMember() {
+        Long userId = 2L;
+        List<Group> foundList = repository.findAllWithMember(userId);
+
+        assertEquals(1, foundList.size());
+        assertTrue(foundList.get(0).getMembers().contains(userId));
+    }
+
+    @Test
+    @Sql(scripts = "classpath:scripts/insert_test_groups_with_different_members.sql")
+    void findAllWithMember_TwoGroupsWithSuchIdExists_ShouldReturnTwoGroupsWithMember() {
+        Long userId = 1L;
+        List<Group> foundList = repository.findAllWithMember(userId);
+
+        assertEquals(2, foundList.size());
+        assertTrue(foundList.get(0).getMembers().contains(userId));
+        assertTrue(foundList.get(1).getMembers().contains(userId));
+    }
+
+    @Test
+    @Sql(scripts = "classpath:scripts/insert_test_groups_with_different_members.sql")
+    void findAllWithMember_NoGroupsWithSuchIdExists_ShouldReturnZeroGroups() {
+        Long userId = 6L;
+        List<Group> foundList = repository.findAllWithMember(userId);
+
+        assertTrue(foundList.isEmpty());
+    }
+
+    @Test
+    @Sql(scripts = "classpath:scripts/insert_test_groups_with_different_members.sql")
+    void findAllWithMember_GroupWithSingleMemberExists_ShouldReturnOneGroupWithOneMember() {
+        Long userId = 4L;
+        List<Group> foundList = repository.findAllWithMember(userId);
+
+        assertEquals(1, foundList.size());
+        assertEquals(1, foundList.get(0).getMembers().size());
+        assertTrue(foundList.get(0).getMembers().contains(userId));
+    }
+
+    @Test
+    @Sql(scripts = "classpath:scripts/insert_test_group_with_member_id_123_and_456.sql")
+    void findAllWithMember_GroupWithComplexMembersIdsExistsAndSearchWithSimpleNumbers_ShouldReturnZeroGroups() {
+        Long userId1 = 1L;
+        List<Group> foundList1 = repository.findAllWithMember(userId1);
+        assertTrue(foundList1.isEmpty());
+
+        Long userId2 = 3L;
+        List<Group> foundList2 = repository.findAllWithMember(userId2);
+        assertTrue(foundList2.isEmpty());
+
+        Long userId3 = 4L;
+        List<Group> foundList3 = repository.findAllWithMember(userId3);
+        assertTrue(foundList3.isEmpty());
+
+        Long userId4 = 6L;
+        List<Group> foundList4 = repository.findAllWithMember(userId4);
+        assertTrue(foundList4.isEmpty());
     }
 }

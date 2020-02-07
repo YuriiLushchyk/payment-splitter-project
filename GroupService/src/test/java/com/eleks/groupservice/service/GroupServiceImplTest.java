@@ -14,9 +14,11 @@ import com.google.common.collect.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -24,8 +26,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class GroupServiceImplTest {
@@ -209,5 +210,42 @@ class GroupServiceImplTest {
         assertEquals(1, result.size());
         UserStatusDto statusDto = result.get(0);
         assertEquals(member.getId(), statusDto.getUserId());
+    }
+
+    @Test
+    void deleteMemberFromAllGroups_TwoGroupsWithSuchMembersExist_ShouldUpdateTwoGroupsWithMembersWithoutDeleted() {
+        Long userId = 1L;
+        List<Group> groups = Arrays.asList(
+                Group.builder()
+                        .id(1L)
+                        .members(Sets.newHashSet(1L, 2L))
+                        .build(),
+                Group.builder()
+                        .id(2L)
+                        .members(Sets.newHashSet(1L, 3L))
+                        .build());
+
+        when(repository.findAllWithMember(userId)).thenReturn(groups);
+
+        service.deleteMemberFromAllGroups(userId);
+
+        ArgumentCaptor<Group> argumentCaptor = ArgumentCaptor.forClass(Group.class);
+
+        verify(repository, times(2)).save(argumentCaptor.capture());
+
+        List<Group> savedGroups = argumentCaptor.getAllValues();
+        assertEquals(Sets.newHashSet(2L), savedGroups.get(0).getMembers());
+        assertEquals(Sets.newHashSet(3L), savedGroups.get(1).getMembers());
+    }
+
+    @Test
+    void deleteMemberFromAllGroups_ZeroGroupsWithSuchMembersExist_ShouldDoNothing() {
+        Long userId = 1L;
+
+        when(repository.findAllWithMember(userId)).thenReturn(Collections.emptyList());
+
+        service.deleteMemberFromAllGroups(userId);
+
+        verifyNoMoreInteractions(repository);
     }
 }

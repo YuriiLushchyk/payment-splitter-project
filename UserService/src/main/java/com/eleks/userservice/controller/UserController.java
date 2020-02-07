@@ -4,6 +4,7 @@ import com.eleks.userservice.dto.UserSearchDto;
 import com.eleks.userservice.dto.user.UserRequestDto;
 import com.eleks.userservice.dto.user.UserResponseDto;
 import com.eleks.userservice.exception.ResourceNotFoundException;
+import com.eleks.userservice.notifications.NotificationSender;
 import com.eleks.userservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,10 +17,12 @@ import java.util.List;
 public class UserController {
 
     private UserService service;
+    private NotificationSender sender;
 
     @Autowired
-    public UserController(UserService service) {
+    public UserController(UserService service, NotificationSender sender) {
         this.service = service;
+        this.sender = sender;
     }
 
     @GetMapping("/users/{id}")
@@ -47,6 +50,7 @@ public class UserController {
     @DeleteMapping("/users/{id}")
     public void deleteUser(@PathVariable Long id) {
         service.deleteUserById(id);
+        sender.sendDeleteUserEvent(id);
     }
 
     @PostMapping("/users/search")
